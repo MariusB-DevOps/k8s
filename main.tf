@@ -50,7 +50,7 @@ module "route_table" {
   vpc_id            = module.vpc.vpc_id
   k8s_igw_id        = module.igw.k8s_igw_id
   public_subnet_map = { for idx, id in module.subnet.public_subnet_ids : idx => id }
-  nat_gateway_id    = module.nat_gateway.id
+  nat_gateway_id    = module.igw.nat_gateway_id
   private_subnet_map = { for idx, id in module.subnet.private_subnet_ids : idx => id }
 }
 

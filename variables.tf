@@ -178,7 +178,12 @@ variable "public_subnets" {
   default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 }
 
-variable "public_key_content" {
-  description = "The public key content"
+variable "ingress_controller_public_dns" {
+  description = "The public DNS of the ingress controller"
+  type        = string
+}
+
+variable "ingress_controller_zone_id" {
+  description = "The hosted zone ID of the ingress controller"
   type        = string
 }

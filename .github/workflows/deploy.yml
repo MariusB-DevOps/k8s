@@ -79,4 +79,7 @@ jobs:
       run: echo "The zone ID is ${{ env.ZONE_ID }}"
 
     - name: Terraform Apply Route 53
+      env:
+        TF_VAR_ingress_controller_public_dns: ${{ env.EXTERNAL_IP }}
+        TF_VAR_ingress_controller_zone_id: ${{ env.ZONE_ID }}
       run: terraform apply -auto-approve -target=aws_route53_record.jenkins

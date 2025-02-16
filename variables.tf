@@ -150,7 +150,7 @@ variable "public_subnet_cidrs" {
 
 variable "private_subnet_cidrs" {
   description = "CIDR blocks for private subnets"
-  type        = list(string)
+  type        = list(string
   default     = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
@@ -176,4 +176,14 @@ variable "public_subnets" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
   default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+}
+
+variable "ingress_controller_public_dns" {
+  description = "The public DNS of the ingress controller"
+  type        = string
+}
+
+variable "ingress_controller_zone_id" {
+  description = "The hosted zone ID of the ingress controller"
+  type        = string
 }

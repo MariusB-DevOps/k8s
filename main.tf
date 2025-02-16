@@ -90,14 +90,14 @@ module "eks" {
   environment      = var.environment
 }
 
-module "route53" {
-  source = "./modules/route53"
+# module "route53" {
+#   source = "./modules/route53"
 
-  route53_zone_id = "Z05844171BN27HQQ98YZ8"
-  jenkins_ingress_host = var.jenkins_ingress_host
-  ingress_controller_public_dns = var.ingress_controller_public_dns
-  ingress_controller_zone_id = var.ingress_controller_zone_id
-}
+#   route53_zone_id = "Z05844171BN27HQQ98YZ8"
+#   jenkins_ingress_host = var.jenkins_ingress_host
+#   ingress_controller_public_dns = var.ingress_controller_public_dns
+#   ingress_controller_zone_id = var.ingress_controller_zone_id
+# }
 
 module "jenkins" {
   source = "./modules/jenkins"

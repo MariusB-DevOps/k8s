@@ -142,6 +142,11 @@ variable "public_key_path" {
   default     = "~/.ssh/id_rsa.pub"
 }
 
+variable "public_key_content" {
+  description = "The content of the public SSH key"
+  type        = string
+}
+
 variable "public_subnet_cidrs" {
   description = "CIDR blocks for public subnets"
   type        = list(string)

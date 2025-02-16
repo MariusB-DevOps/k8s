@@ -11,5 +11,5 @@ output "cluster_endpoint" {
 #}
 
 output "cluster_certificate_authority_data" {
-  value = module.eks_module.cluster_certificate_authority_data # Assuming the module has an output for this
+  value = module.eks.cluster_certificate_authority_data
 }

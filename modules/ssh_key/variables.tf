@@ -4,8 +4,7 @@ variable "key_pair_name" {
   default     = "k8s-key"
 }
 
-variable "public_key_path" {
-  description = "Path to the public key file"
+variable "public_key_content" {
+  description = "The public key content"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
 }

@@ -34,6 +34,9 @@ jobs:
         TF_VAR_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
       run: terraform apply -auto-approve -target=module.vpc -target=module.ssh_key
 
+    - name: Print Environment Variables
+      run: env
+
     - name: Terraform Plan for Subnets and Security Groups
       run: terraform plan -target=module.subnet -target=module.security_group
 

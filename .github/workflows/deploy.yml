@@ -29,9 +29,6 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan
-
     - name: Terraform Apply VPC and SSH Key
       env:
         TF_VAR_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}

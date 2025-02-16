@@ -145,13 +145,13 @@ variable "public_key_path" {
 variable "public_subnet_cidrs" {
   description = "CIDR blocks for public subnets"
   type        = list(string)
-  default     = ["10.0.1.0/24","10.0.2.0/24"]
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "private_subnet_cidrs" {
   description = "CIDR blocks for private subnets"
   type        = list(string)
-  default     = ["10.0.3.0/24","10.0.4.0/24"]
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
 }
 
 variable "vpc_name" {
@@ -178,12 +178,7 @@ variable "public_subnets" {
   default     = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 }
 
-#variable "ingress_controller_public_dns" {
-#  description = "The public DNS of the ingress controller"
-#  type        = string
-#}
-
-#variable "ingress_controller_zone_id" {
-#  description = "The hosted zone ID of the ingress controller"
-#  type        = string
-#}
+variable "public_key_content" {
+  description = "The public key content"
+  type        = string
+}

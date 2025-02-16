@@ -31,8 +31,12 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Apply VPC and SSH Key
-      run: terraform apply -auto-approve -target=module.vpc -target=module.ssh_key
+    - name: Terraform Apply
+      id: apply
+      run: terraform apply -auto-approve
+
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name ${{ steps.apply.outputs.cluster_name }} --region eu-west-1
 
     - name: Print TF_VAR_public_key_content
       run: echo "TF_VAR_public_key_content=${TF_VAR_public_key_content}"
@@ -51,14 +55,6 @@ jobs:
 
     - name: Terraform Apply EKS
       run: terraform apply -auto-approve -target=module.eks
-
-    - name: Setup kubectl
-      uses: azure/setup-kubectl@v1
-      with:
-        version: 'latest'
-
-    - name: Update kubeconfig
-      run: aws eks update-kubeconfig --name your-cluster-name --region eu-west-1
 
     - name: Terraform Apply Kubernetes Namespace and Jenkins
       run: terraform apply -auto-approve -target=module.jenkins

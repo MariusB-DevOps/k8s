@@ -47,9 +47,11 @@ module "network_interfaces" {
 module "route_table" {
   source = "./modules/route_table"
 
-  vpc_id = module.vpc.vpc_id
-  k8s_igw_id = module.igw.k8s_igw_id
+  vpc_id            = module.vpc.vpc_id
+  k8s_igw_id        = module.igw.k8s_igw_id
   public_subnet_map = { for idx, id in module.subnet.public_subnet_ids : idx => id }
+  nat_gateway_id    = module.nat_gateway.id
+  private_subnet_map = { for idx, id in module.subnet.private_subnet_ids : idx => id }
 }
 
 module "security_group" {

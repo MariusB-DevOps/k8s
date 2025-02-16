@@ -95,74 +95,18 @@ module "route53" {
 
   route53_zone_id = "Z05844171BN27HQQ98YZ8"
   jenkins_ingress_host = var.jenkins_ingress_host
-  ingress_controller_public_dns = var.ingress_controller_public_dns
-  ingress_controller_zone_id = var.ingress_controller_zone_id
 }
 
-resource "kubernetes_namespace" "jenkins" {
-  metadata {
-    name = var.jenkins_namespace
-  }
-}
+module "jenkins" {
+  source = "./modules/jenkins"
 
-resource "helm_release" "jenkins" {
-  name       = var.jenkins_release_name
-  repository = "https://charts.jenkins.io"
-  chart      = "jenkins"
-  namespace  = kubernetes_namespace.jenkins.metadata[0].name
-
-  set {
-    name  = "controller.ingress.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "controller.ingress.hostName"
-    value = var.jenkins_ingress_host
-  }
-
-  set {
-    name  = "controller.ingress.annotations.nginx.ingress.kubernetes.io/force-ssl-redirect"
-    value = "true"
-  }
-
-  set {
-    name  = "controller.ingress.annotations.nginx.ingress.kubernetes.io/ssl-redirect"
-    value = "true"
-  }
-
-  set {
-    name  = "persistence.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "persistence.size"
-    value = var.jenkins_persistence_size
-  }
-
-  set {
-    name  = "controller.javaOpts"
-    value = var.jenkins_java_opts
-  }
-
-  set {
-    name  = "controller.resources.requests.cpu"
-    value = var.jenkins_resources_requests_cpu
-  }
-
-  set {
-    name  = "controller.resources.requests.memory"
-    value = var.jenkins_resources_requests_memory
-  }
-
-  set {
-    name  = "controller.resources.limits.cpu"
-    value = var.jenkins_resources_limits_cpu
-  }
-
-  set {
-    name  = "controller.resources.limits.memory"
-    value = var.jenkins_resources_limits_memory
-  }
+  jenkins_namespace = var.jenkins_namespace
+  jenkins_release_name = var.jenkins_release_name
+  jenkins_ingress_host = var.jenkins_ingress_host
+  jenkins_persistence_size = var.jenkins_persistence_size
+  jenkins_java_opts = var.jenkins_java_opts
+  jenkins_resources_requests_cpu = var.jenkins_resources_requests_cpu
+  jenkins_resources_requests_memory = var.jenkins_resources_requests_memory
+  jenkins_resources_limits_cpu = var.jenkins_resources_limits_cpu
+  jenkins_resources_limits_memory = var.jenkins_resources_limits_memory
 }

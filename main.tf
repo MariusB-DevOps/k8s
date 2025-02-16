@@ -63,7 +63,7 @@ module "ssh_key" {
   source = "./modules/ssh_key"
 
   key_pair_name = var.key_pair_name
-  public_key_path = var.public_key_path
+  public_key_content = var.public_key_content
 }
 
 module "subnet" {

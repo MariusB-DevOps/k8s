@@ -9,6 +9,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
 
     steps:
     - name: Checkout code
@@ -30,8 +32,6 @@ jobs:
       run: terraform init
 
     - name: Terraform Apply VPC and SSH Key
-      env:
-        TF_VAR_public_key_content: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
       run: terraform apply -auto-approve -target=module.vpc -target=module.ssh_key
 
     - name: Print TF_VAR_public_key_content
@@ -79,14 +79,15 @@ jobs:
     # - name: Output External IP
     #   run: echo "The external IP is ${{ env.EXTERNAL_IP }}"
 
-    - name: Retrieve Route 53 Zone ID
-      id: get_zone_id
-      run: |
-        ZONE_ID=$(aws route53 list-hosted-zones-by-name --dns-name "k8s.it.com" --query "HostedZones[0].Id" --output text)
-        echo "ZONE_ID=${ZONE_ID}" >> $GITHUB_ENV
+    # Commented out Retrieve Route 53 Zone ID step
+    # - name: Retrieve Route 53 Zone ID
+    #   id: get_zone_id
+    #   run: |
+    #     ZONE_ID=$(aws route53 list-hosted-zones-by-name --dns-name "k8s.it.com" --query "HostedZones[0].Id" --output text)
+    #     echo "ZONE_ID=${ZONE_ID}" >> $GITHUB_ENV
 
-    - name: Output Zone ID
-      run: echo "The zone ID is ${{ env.ZONE_ID }}"
+    # - name: Output Zone ID
+    #   run: echo "The zone ID is ${{ env.ZONE_ID }}"
 
     # Commented out Route 53 step
     # - name: Terraform Apply Route 53

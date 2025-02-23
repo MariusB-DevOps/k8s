@@ -34,7 +34,7 @@ jobs:
         working-directory: terraform/aws
 
       - name: Terraform Plan
-        run: terraform plan -var-file=terraform.tfvars
+        run: terraform plan 
         working-directory: terraform/aws
         continue-on-error: true #Allows plan to complete even if errors are found, so the output can be reviewed
 
@@ -43,5 +43,5 @@ jobs:
         run: exit 1 # Fail the workflow if terraform plan fails.
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=terraform.tfvars
+        run: terraform apply -auto-approve
         working-directory: terraform/aws

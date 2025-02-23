@@ -8,7 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      TF_VAR_iam_user_arn: ${{ secrets.IAM_USER_ARN }}
+      TF_VAR_iam_role_arn: ${{ secrets.IAM_ROLE_ARN }}
+      TF_VAR_assume_role_principal_arn: ${{ secrets.ASSUME_ROLE_PRINCIPAL_ARN }}
+      TF_VAR_iam_username: ${{ secrets.IAM_USERNAME }}  
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

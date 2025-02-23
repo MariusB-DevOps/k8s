@@ -2,6 +2,7 @@ Instructions for EKS deployment on AWS
 
 The working directory is: "aws"
 It contains the following files:
+.gitignore
 terraform.tf
 variables.tf
 vpc.tf
@@ -24,3 +25,4 @@ The outputs.tf file defines the outputs we want printed to the CLI.
 
 The backend.tf file defines the backend we will use ( in my case a s3 bucket to store the state ).
 
+The .gitignore file contains a list of files / folders excluded from git.

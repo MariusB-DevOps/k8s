@@ -38,7 +38,7 @@ module "eks" {
   version = "20.33.1"
 
   cluster_name    = "eks-cluster"
-  cluster_version = "1.32"  # Ensure a supported version!
+  cluster_version = "1.31"  # Ensure a supported version!
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets

@@ -1,13 +1,3 @@
-terraform {
-  required_version = ">= 1.3.0"
-
-  backend "s3" {
-    bucket         = "mariusb-tf-state"
-    key            = "terraform/state/terraform.tfstate"
-    region         = "eu-west-1"
-  }
-}
-
 # Declare the AWS Availability Zones data source
 data "aws_availability_zones" "available" {
   state = "available"

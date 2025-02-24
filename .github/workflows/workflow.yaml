@@ -8,16 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      TF_VAR_iam_user_arn: ${{ secrets.IAM_USER_ARN }}
-      TF_VAR_iam_role_arn: ${{ secrets.IAM_ROLE_ARN }}
-      TF_VAR_assume_role_principal_arn: ${{ secrets.ASSUME_ROLE_PRINCIPAL_ARN }}
-      TF_VAR_iam_username: ${{ secrets.IAM_USERNAME }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -43,23 +33,18 @@ jobs:
         working-directory: terraform/eks
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=terraform.tfplan
         working-directory: terraform/eks
-        continue-on-error: true # Allows plan to complete even if errors are found, so the output can be reviewed
-
-      - name: Terraform Plan Output
-        if: ${{ failure() && steps['Terraform Plan'].outcome == 'failure' }}
-        run: exit 1 # Fail the workflow if terraform plan fails.
 
       - name: Terraform Apply (Main)
         run: terraform apply -auto-approve
-        working-directory: terraform/aws
+        working-directory: terraform/eks
 
       - name: Extract Cluster Name
         id: extract-cluster-name
         run: |
           echo "::set-output name=cluster_name::$(terraform output -raw cluster_name)"
-        working-directory: terraform/aws
+        working-directory: terraform/eks
 
       - name: Configure kubeconfig
         run: |

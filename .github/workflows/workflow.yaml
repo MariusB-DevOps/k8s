@@ -53,7 +53,7 @@ jobs:
         run: exit 1 # Fail the workflow if terraform plan fails.
 
       - name: Terraform Apply (Main)
-        run: terraform apply -auto-approve -target=module.eks
+        run: terraform apply -auto-approve
         working-directory: terraform/aws
 
       - name: Extract Cluster Name

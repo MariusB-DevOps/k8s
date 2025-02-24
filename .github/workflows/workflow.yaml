@@ -8,6 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     env:
       TF_VAR_iam_user_arn: ${{ secrets.IAM_USER_ARN }}
       TF_VAR_iam_role_arn: ${{ secrets.IAM_ROLE_ARN }}
@@ -28,21 +31,21 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1 # Or your desired region
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-eks
+          role-session-name: GitHubActionSession
+          aws-region: us-east-1
 
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform/aws
+        working-directory: terraform/eks
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: terraform/aws
+        working-directory: terraform/eks
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: terraform/aws
+        working-directory: terraform/eks
         continue-on-error: true # Allows plan to complete even if errors are found, so the output can be reviewed
 
       - name: Terraform Plan Output
@@ -68,8 +71,3 @@ jobs:
 
       - name: Verify kubectl connection
         run: kubectl get nodes
-
-      - name: Terraform Apply (aws-auth)
-        run: terraform apply -target=module.eks_aws-auth -auto-approve
-        working-directory: terraform/aws
-

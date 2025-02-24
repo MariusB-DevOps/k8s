@@ -4,42 +4,16 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
-    }
   }
   backend "s3" {
     bucket = "mariusb-tf-state"
-    key    = "terraform/state/terraform.tfstate"
+    key    = "terraform/state/eks-stage1.tfstate"
     region = "eu-west-1"
   }
 }
 
 provider "aws" {
   region = "eu-west-1"
-}
-
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = data.aws_eks_auth_token.token
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    token                  = data.aws_eks_auth_token.token
-  }
-}
-
-data "aws_eks_auth_token" "token" {
-  cluster_name = module.eks.cluster_name
 }
 
 module "eks" {
@@ -75,3 +49,18 @@ module "vpc" {
   single_nat_gateway = true
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = module.eks.cluster_name
+}
+
+output "cluster_name" {
+  value = module.eks.cluster_name
+}
+
+output "cluster_endpoint" {
+  value = data.aws_eks_cluster.cluster.endpoint
+}
+
+output "cluster_certificate_authority_data" {
+  value = data.aws_eks_cluster.cluster.certificate_authority[0].data
+}

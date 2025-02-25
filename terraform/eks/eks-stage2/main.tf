@@ -33,16 +33,22 @@ data "terraform_remote_state" "eks_stage1" {
   }
 }
 
+# Add the data block to query the EKS cluster
+
+data "aws_eks_cluster" "cluster" {
+  name = data.terraform_remote_state.eks_stage1.outputs.cluster_name
+}
+
 provider "kubernetes" {
-  host                   = data.terraform_remote_state.eks_stage1.outputs.cluster_endpoint
-  cluster_ca_certificate = base64decode(data.terraform_remote_state.eks_stage1.outputs.cluster_certificate_authority_data)
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
   token                  = var.eks_token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = data.terraform_remote_state.eks_stage1.outputs.cluster_endpoint
-    cluster_ca_certificate = base64decode(data.terraform_remote_state.eks_stage1.outputs.cluster_certificate_authority_data)
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
     token                  = var.eks_token
   }
 }

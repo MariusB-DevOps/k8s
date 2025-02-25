@@ -43,14 +43,14 @@ jobs:
           echo "::set-output name=token::$TOKEN"
         working-directory: terraform/eks/eks-stage1
 
-      - name: Terraform Init (Stage 2)
-        run: terraform init
-        working-directory: terraform/eks/eks-stage2
+      # - name: Terraform Init (Stage 2)
+      #   run: terraform init
+      #   working-directory: terraform/eks/eks-stage2
 
-      - name: Terraform Plan (Stage 2)
-        run: terraform plan
-        working-directory: terraform/eks/eks-stage2
+      # - name: Terraform Plan (Stage 2)
+      #   run: terraform plan
+      #   working-directory: terraform/eks/eks-stage2
 
-      - name: Terraform Apply (Stage 2)
-        run: terraform apply -auto-approve -var="eks_token=${{ steps.get_token.outputs.token }}"
-        working-directory: terraform/eks/eks-stage2
+      # - name: Terraform Apply (Stage 2)
+      #   run: terraform apply -auto-approve -var="eks_token=${{ steps.get_token.outputs.token }}"
+      #   working-directory: terraform/eks/eks-stage2

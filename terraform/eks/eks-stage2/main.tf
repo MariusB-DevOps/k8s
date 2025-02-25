@@ -42,17 +42,23 @@ data "aws_eks_cluster" "cluster" {
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-  token                  = var.eks_token
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.cluster.name]
+  }
 }
 
 provider "helm" {
   kubernetes {
     host                   = data.aws_eks_cluster.cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-    token                  = var.eks_token
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.cluster.name]
+    }
   }
 }
-
-variable "eks_token" {}
 
 # Add Kubernetes resources or Helm charts here

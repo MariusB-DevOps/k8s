@@ -33,6 +33,9 @@ module "eks" {
       instance_types = ["t3.medium"]
     }
   }
+
+  # Allow access to the EKS API server from your IP
+  cluster_endpoint_public_access_cidrs = ["86.120.230.117/32"]
 }
 
 module "vpc" {

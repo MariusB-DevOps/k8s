@@ -19,7 +19,7 @@ provider "aws" {
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = "mariusb-eks"
-  cluster_version = "1.27"
+  cluster_version = "1.32"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -51,16 +51,4 @@ module "vpc" {
 
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_name
-}
-
-output "cluster_name" {
-  value = module.eks.cluster_name
-}
-
-output "cluster_endpoint" {
-  value = data.aws_eks_cluster.cluster.endpoint
-}
-
-output "cluster_certificate_authority_data" {
-  value = data.aws_eks_cluster.cluster.certificate_authority[0].data
 }

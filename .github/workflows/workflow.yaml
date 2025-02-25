@@ -52,5 +52,5 @@ jobs:
         working-directory: terraform/eks/eks-stage2
 
       - name: Terraform Apply (Stage 2)
-        run: terraform apply -auto-approve -var="cluster_endpoint=$(terraform output -raw cluster_endpoint -state=../eks-stage1/terraform.tfstate)" -var="cluster_certificate_authority_data=$(terraform output -raw cluster_certificate_authority_data -state=../eks-stage1/terraform.tfstate)" -var="eks_token=${{ steps.get_token.outputs.token }}"
+        run: terraform apply -auto-approve -var="eks_token=${{ steps.get_token.outputs.token }}"
         working-directory: terraform/eks/eks-stage2

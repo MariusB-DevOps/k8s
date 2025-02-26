@@ -1,0 +1,56 @@
+name: Deploy EKS Cluster
+
+on:
+  push:
+    branches:
+      - aws # Or your desired branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest # Or specify a version
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}          
+          aws-region: eu-west-1
+
+      - name: Terraform Init (Stage 1)
+        run: terraform init -reconfigure
+        working-directory: terraform/eks/eks-stage1
+
+      - name: Terraform Plan (Stage 1)
+        run: terraform plan
+        working-directory: terraform/eks/eks-stage1
+
+      - name: Terraform Apply (Stage 1)
+        run: terraform apply -auto-approve
+        working-directory: terraform/eks/eks-stage1
+
+      - name: Get EKS Token
+        id: get_token
+        run: |
+          TOKEN=$(aws eks get-token --cluster-name mariusb-eks --region eu-west-1 | jq -r .status.token)
+          echo "::set-output name=token::$TOKEN"
+        working-directory: terraform/eks/eks-stage1
+
+      # - name: Terraform Init (Stage 2)
+      #   run: terraform init
+      #   working-directory: terraform/eks/eks-stage2
+
+      # - name: Terraform Plan (Stage 2)
+      #   run: terraform plan
+      #   working-directory: terraform/eks/eks-stage2
+
+      # - name: Terraform Apply (Stage 2)
+      #   run: terraform apply -auto-approve -var="eks_token=${{ steps.get_token.outputs.token }}"
+      #   working-directory: terraform/eks/eks-stage2

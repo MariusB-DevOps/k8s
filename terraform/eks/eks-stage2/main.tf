@@ -35,9 +35,9 @@ data "terraform_remote_state" "eks_stage1" {
 
 # Add the data block to query the EKS cluster
 
-data "aws_eks_cluster" "cluster" {
-  name = data.terraform_remote_state.eks_stage1.outputs.cluster_name
-}
+#data "aws_eks_cluster" "cluster" {
+#  name = data.terraform_remote_state.eks_stage1.outputs.cluster_name
+#}
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.cluster.endpoint
@@ -56,7 +56,7 @@ provider "helm" {
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.cluster.name]
+      args        = ["eks", "get-token", "--cluster-name", mariusb-eks]
     }
   }
 }

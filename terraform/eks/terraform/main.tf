@@ -2,7 +2,6 @@ provider "aws" {
   region = "eu-west-1"
 }
 terraform {
-  required_version = "1.11.0"
   backend "s3" {
     bucket = "mariusb-tf-state"
     key    = "terraform/state/terraform.tfstate"

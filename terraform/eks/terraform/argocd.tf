@@ -89,9 +89,9 @@ data "aws_secretsmanager_secret_version" "github_credentials" {
 
 locals {
   github_credentials    = jsondecode(data.aws_secretsmanager_secret_version.github_credentials.secret_string)
-  repo_url              = jsondecode(data.aws_secretsmanager_secret_version.github_repo_url.secret_string).value
-  repo_username         = jsondecode(data.aws_secretsmanager_secret_version.github_repo_username.secret_string).value
-  repo_token            = jsondecode(data.aws_secretsmanager_secret_version.github_repo_token.secret_string).value
+  repo_url              = github_credentials.repo_url
+  repo_username         = github_credentials.username
+  repo_token            = github_credentials.token  
   argocd_admin_password = base64decode(data.kubernetes_secret.argocd_admin_secret.data.password)
 }
 

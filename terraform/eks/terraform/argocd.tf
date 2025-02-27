@@ -15,6 +15,7 @@ terraform {
   }
 }
 
+
 provider "kubernetes" {
   host                   = aws_eks_cluster.main.endpoint
   token                  = data.aws_eks_cluster_auth.main.token

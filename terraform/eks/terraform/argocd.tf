@@ -65,6 +65,7 @@ data "kubernetes_service" "argocd_server" {
 }
 
 data "kubernetes_secret" "argocd_admin_secret" {
+  depends_on = [aws_eks_cluster.main]
   metadata {
     name      = "argocd-initial-admin-secret"
     namespace = "argocd"

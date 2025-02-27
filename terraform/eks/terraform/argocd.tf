@@ -83,10 +83,6 @@ data "aws_secretsmanager_secret_version" "github_repo_token" {
   secret_id = "argocd-repo-token"
 }
 
-data "aws_secretsmanager_secret_version" "argocd_admin_password" {
-  secret_id = "argocd-admin-password"
-}
-
 locals {
   repo_url              = jsondecode(data.aws_secretsmanager_secret_version.github_repo_url.secret_string).value
   repo_username         = jsondecode(data.aws_secretsmanager_secret_version.github_repo_username.secret_string).value

@@ -80,12 +80,6 @@ resource "null_resource" "get_argocd_password" {
     EOF
     on_failure = fail
   }
-
-  outputs = {
-    stdout = {
-      value = self.provisioners["local-exec"].outputs.stdout
-    }
-  }
 }
 
 # AWS Secrets Manager Data Sources

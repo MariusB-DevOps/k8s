@@ -42,5 +42,5 @@ jobs:
         run: aws eks --region eu-west-1 update-kubeconfig --name main-eks-cluster
       
       - name: Deploy application
-        run: kubectl apply -f argocd/config/argocd-app.yaml
+        run: kubectl apply -f ../../terraform/eks/argocd/config/argocd-app.yaml
 

@@ -20,7 +20,7 @@ jobs:
      run:
        shell: bash
        # We keep Terraform files in the terraform directory.
-       working-directory: ./terraform
+       working-directory: ../../terraform/eks/terraform
  
    steps:
      - name: Checkout the repository to the runner
@@ -43,7 +43,7 @@ jobs:
      - name: Terraform init
        id: init
        run: terraform init
- 
+
      - name: Terraform format
        id: fmt
        run: terraform fmt -check
@@ -51,7 +51,7 @@ jobs:
      - name: Terraform validate
        id: validate
        run: terraform validate
- 
+
      - name: Terraform plan
        id: plan
        if: github.event_name == 'pull_request'

@@ -1,0 +1,56 @@
+name: Destroy
+
+on: 
+  workflow_dispatch:
+    
+
+jobs:
+ destroy:
+   name: "Delete app and infrastructure"
+   runs-on: ubuntu-latest
+   defaults:
+     run:
+       shell: bash
+       # We keep Terraform files in the terraform directory.
+       working-directory: ../../terraform/eks/terraform
+    
+   steps:
+     - name: Checkout the repository to the runner
+       uses: actions/checkout@v2
+ 
+     - name: Setup Terraform with specified version on the runner
+       uses: hashicorp/setup-terraform@v3
+       with:
+         terraform_version: 1.5.7
+         terraform_wrapper: false
+    
+     - name: Configure AWS credentials
+       uses: aws-actions/configure-aws-credentials@v2
+       with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+    
+     - name: Install kubectl
+       run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+     - name: Update kubeconfig
+       run: aws eks --region eu-west-1 update-kubeconfig --name main-eks-cluster
+      
+     - name: Deploy application
+       run: | 
+          kubectl delete -f ../argocd/config/argocd-app.yaml || true
+          kubectl delete namespace argocd || true
+     
+     - name: Terraform init
+       id: init
+       run: terraform init
+
+     - name: Terraform destroy
+       id: destroy
+       run: terraform destroy -auto-approve
+      

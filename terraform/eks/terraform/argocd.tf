@@ -73,13 +73,6 @@ resource "null_resource" "get_argocd_password" {
     EOF
     on_failure = fail
   }
-
-  provisioner "local-exec" {
-    command    = <<EOF
-      echo "${self.outputs.stdout}" > argocd_password.txt
-    EOF
-    on_failure = fail
-  }
 }
 
 # AWS Secrets Manager Data Sources
@@ -104,7 +97,7 @@ locals {
 }
 
 resource "null_resource" "argocd_repo_cli" {
-  depends_on = [helm_release.argocd]
+  depends_on = [null_resource.get_argocd_password]
 
   provisioner "local-exec" {
     command = <<EOF

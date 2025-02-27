@@ -1,3 +1,20 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+  }
+}
+
 provider "kubernetes" {
   host                   = aws_eks_cluster.main.endpoint
   token                  = data.aws_eks_cluster_auth.main.token
@@ -43,5 +60,51 @@ data "kubernetes_service" "argocd_server" {
   metadata {
     name      = "argocd-server"
     namespace = helm_release.argocd.namespace
+  }
+}
+
+data "kubernetes_secret" "argocd_admin_secret" {
+  metadata {
+    name      = "argocd-initial-admin-secret"
+    namespace = "argocd"
+  }
+}
+
+# AWS Secrets Manager Data Sources
+data "aws_secretsmanager_secret_version" "github_repo_url" {
+  secret_id = "argocd-repo-url"
+}
+
+data "aws_secretsmanager_secret_version" "github_repo_username" {
+  secret_id = "argocd-repo-username"
+}
+
+data "aws_secretsmanager_secret_version" "github_repo_token" {
+  secret_id = "argocd-repo-token"
+}
+
+data "aws_secretsmanager_secret_version" "argocd_admin_password" {
+  secret_id = "argocd-admin-password"
+}
+
+locals {
+  repo_url              = jsondecode(data.aws_secretsmanager_secret_version.github_repo_url.secret_string).value
+  repo_username         = jsondecode(data.aws_secretsmanager_secret_version.github_repo_username.secret_string).value
+  repo_token            = jsondecode(data.aws_secretsmanager_secret_version.github_repo_token.secret_string).value
+  argocd_admin_password = base64decode(data.kubernetes_secret.argocd_admin_secret.data.password)
+}
+
+resource "null_resource" "argocd_repo_cli" {
+  depends_on = [helm_release.argocd]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      argocd login argocd-server.argocd.svc.cluster.local --username admin --password "${local.argocd_admin_password}" --insecure-skip-tls-verify
+      argocd repo add "${local.repo_url}" \
+        --username "${local.repo_username}" \
+        --password "${local.repo_token}" \
+        --name "my-github-repo" \
+        --insecure-skip-tls-verify
+    EOF
   }
 }

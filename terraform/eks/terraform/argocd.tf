@@ -93,7 +93,7 @@ locals {
   repo_url              = data.aws_secretsmanager_secret_version.repo_url.secret_string
   repo_username         = data.aws_secretsmanager_secret_version.repo_username.secret_string
   repo_token            = data.aws_secretsmanager_secret_version.repo_token.secret_string
-  argocd_admin_password = null_resource.get_argocd_password.provisioners["local-exec"].outputs.stdout
+  argocd_admin_password = self.provisioners["local-exec"].stdout
 }
 
 resource "null_resource" "argocd_repo_cli" {

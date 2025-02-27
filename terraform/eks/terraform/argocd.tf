@@ -71,19 +71,24 @@ data "kubernetes_secret" "argocd_admin_secret" {
 }
 
 # AWS Secrets Manager Data Sources
-data "aws_secretsmanager_secret_version" "github_repo_url" {
-  secret_id = "argocd-repo-url"
-}
+#data "aws_secretsmanager_secret_version" "github_repo_url" {
+#  secret_id = "argocd-repo-url"
+#}
 
-data "aws_secretsmanager_secret_version" "github_repo_username" {
-  secret_id = "argocd-repo-username"
-}
+#data "aws_secretsmanager_secret_version" "github_repo_username" {
+#  secret_id = "argocd-repo-username"
+#}
 
-data "aws_secretsmanager_secret_version" "github_repo_token" {
-  secret_id = "argocd-repo-token"
+#data "aws_secretsmanager_secret_version" "github_repo_token" {
+#  secret_id = "argocd-repo-token"
+#}
+
+data "aws_secretsmanager_secret_version" "github_credentials" {
+  secret_id = "argocd-github-credentials"
 }
 
 locals {
+  github_credentials    = jsondecode(data.aws_secretsmanager_secret_version.github_credentials.secret_string)
   repo_url              = jsondecode(data.aws_secretsmanager_secret_version.github_repo_url.secret_string).value
   repo_username         = jsondecode(data.aws_secretsmanager_secret_version.github_repo_username.secret_string).value
   repo_token            = jsondecode(data.aws_secretsmanager_secret_version.github_repo_token.secret_string).value

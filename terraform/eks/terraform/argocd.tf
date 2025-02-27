@@ -64,22 +64,13 @@ data "kubernetes_service" "argocd_server" {
   }
 }
 
-resource "null_resource" "get_argocd_password" {
+data "kubernetes_secret" "argocd_admin_secret" {
   depends_on = [helm_release.argocd]
-
-  provisioner "local-exec" {
-    command    = <<EOF
-      kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-    EOF
-    on_failure = fail
+  metadata {
+    name      = "argocd-initial-admin-secret"
+    namespace = "argocd"
   }
 }
-
-data "local_file" "argocd_password" {
-  filename   = "argocd_password.txt"
-  depends_on = [null_resource.get_argocd_password]
-}
-
 
 # AWS Secrets Manager Data Sources
 
@@ -99,11 +90,11 @@ locals {
   repo_url              = data.aws_secretsmanager_secret_version.repo_url.secret_string
   repo_username         = data.aws_secretsmanager_secret_version.repo_username.secret_string
   repo_token            = data.aws_secretsmanager_secret_version.repo_token.secret_string
-  argocd_admin_password = data.local_file.argocd_password.content
+  argocd_admin_password = base64decode(data.kubernetes_secret.argocd_admin_secret.data.password)
 }
 
 resource "null_resource" "argocd_repo_cli" {
-  depends_on = [data.local_file.argocd_password]
+  depends_on = [data.kubernetes_secret.argocd_admin_secret]
 
   provisioner "local-exec" {
     command = <<EOF

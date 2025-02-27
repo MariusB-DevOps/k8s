@@ -64,26 +64,18 @@ data "kubernetes_service" "argocd_server" {
   }
 }
 
-#data "kubernetes_secret" "argocd_admin_secret" {
-#  depends_on = [aws_eks_cluster.main]
-#  metadata {
-#    name      = "argocd-initial-admin-secret"
-#    namespace = "argocd"
-#  }
-#}
-
 resource "null_resource" "get_argocd_password" {
   depends_on = [helm_release.argocd]
 
   provisioner "local-exec" {
-    command = <<EOF
+    command    = <<EOF
       kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
     EOF
     on_failure = fail
   }
 
   provisioner "local-exec" {
-    command = <<EOF
+    command    = <<EOF
       echo "${self.outputs.stdout}" > argocd_password.txt
     EOF
     on_failure = fail

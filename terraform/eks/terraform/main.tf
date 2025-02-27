@@ -147,7 +147,6 @@ EOF
   }
 }
 
-
 resource "aws_iam_role_policy_attachment" "eks_role_attachment" {
   for_each   = toset(local.policies)
   role       = aws_iam_role.eks_node_role.name

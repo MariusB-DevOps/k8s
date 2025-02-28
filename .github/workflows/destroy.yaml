@@ -12,7 +12,8 @@ jobs:
      run:
        shell: bash
        # We keep Terraform files in the terraform directory.
-       working-directory: ./terraform/eks/terraform
+       working-directory: ./terraform
+
     
    steps:
      - name: Checkout the repository to the runner

@@ -81,6 +81,14 @@ jobs:
       - name: Ensure Jenkins Namespace Exists
         run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: TF Init
+        run: terraform init -reconfigure 
+        working-directory: jenkins/
+
+      - name: TF Validate
+        run: terraform validate 
+        working-directory: jenkins/
+          
       - name: Deploy Jenkins ALB
         run: terraform apply -auto-approve
         working-directory: jenkins/  

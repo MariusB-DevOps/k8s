@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: jenkins
-
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,12 +12,12 @@ spec:
   project: default
   source:
     repoURL: https://charts.jenkins.io
-    targetRevision: "4.1.3"  # Replace with the latest stable version
     chart: jenkins
+    targetRevision: "4.1.3"  # Use a stable Jenkins chart version
     helm:
       values: |
         controller:
-          serviceType: ClusterIP
+          serviceType: LoadBalancer  # Change to LoadBalancer
           ingress:
             enabled: true
             annotations:
@@ -26,14 +26,10 @@ spec:
               alb.ingress.kubernetes.io/scheme: internet-facing
               alb.ingress.kubernetes.io/target-type: ip
               alb.ingress.kubernetes.io/backend-protocol: HTTP
-            hosts:
-              - name: jenkins.k8s.it.com
-                path: /
+            hostName: jenkins.k8s.it.com
   destination:
     server: https://kubernetes.default.svc
     namespace: jenkins
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    
 

@@ -41,16 +41,16 @@ jobs:
       - name: Update kubeconfig
         run: aws eks --region eu-west-1 update-kubeconfig --name main-eks-cluster
 
-      - name: Create Kubernetes secret
-        env:
-          REPO_URL: ${{ secrets.REPO_URL }}
-          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
-          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-        run: |
-          kubectl create secret generic my-github-secret \
-            --from-literal=username=$REPO_USERNAME \
-            --from-literal=password=$REPO_TOKEN \
-            -n argocd
+      #- name: Create Kubernetes secret
+      #  env:
+      #    REPO_URL: ${{ secrets.REPO_URL }}
+      #    REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
+      #    REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      #  run: |
+      #    kubectl create secret generic my-github-secret \
+      #      --from-literal=username=$REPO_USERNAME \
+      #      --from-literal=password=$REPO_TOKEN \
+      #      -n argocd
       
       - name: Deploy application
         run: kubectl apply -f terraform/eks/argocd/config/argocd-app.yaml

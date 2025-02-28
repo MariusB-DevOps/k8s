@@ -71,3 +71,24 @@ jobs:
 
       - name: Deploy application
         run: kubectl apply -f argocd/config/argocd-app.yaml
+
+
+      - name: Deploy Jenkins Using ArgoCD
+        run: kubectl apply -f jenkins/jenkins-app.yaml
+
+      - name: Automate AWS Load Balancer and Route 53 for Jenkins
+        run: scripts/setup-jenkins-lb.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+

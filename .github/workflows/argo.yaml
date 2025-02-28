@@ -60,7 +60,7 @@ jobs:
 
       - name: Login to ArgoCD
         run: |
-          argocd login $ARGOCD_SERVER --username admin --password $ARGOCD_PASSWORD --insecure
+          argocd login $ARGOCD_SERVER --username admin --password $ARGOCD_PASSWORD --insecure --skip-test-tls --grpc-web
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |

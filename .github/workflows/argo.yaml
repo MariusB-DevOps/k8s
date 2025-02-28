@@ -72,6 +72,8 @@ jobs:
       - name: Deploy application
         run: kubectl apply -f argocd/config/argocd-app.yaml
 
+      - name: Ensure Jenkins Namespace Exists
+        run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy Jenkins Using ArgoCD
         run: kubectl apply -f jenkins/jenkins-app.yaml

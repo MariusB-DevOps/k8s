@@ -74,7 +74,7 @@ if [[ "$EXISTING_RECORD" == "[]" ]]; then
   }]
 }
 EOF
-  aws route53 change-resource-record-sets --hosted-zone-id ZONE_ID --change-batch file://change-batch.json
+  aws route53 change-resource-record-sets --hosted-zone-id '$HOSTED_ZONE_ID' --change-batch file://change-batch.json
   echo "✅ DNS validation record added."
 else
   echo "✅ DNS validation record already exists."

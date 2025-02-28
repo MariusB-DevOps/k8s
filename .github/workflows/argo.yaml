@@ -47,10 +47,9 @@ jobs:
           ARGOCD_SERVER=$(kubectl get svc -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> $GITHUB_ENV
 
-      - name: Retrieve and Decode ArgoCD Admin Password
+      - name: Retrieve and Decode ArgoCD Admin Password from Cluster Secret
         run: |
-          ENCODED_PASSWORD=$(aws secretsmanager get-secret-value --secret-id argocd-initial-admin-secret --query SecretString --output text)
-          ARGOCD_PASSWORD=$(echo $ENCODED_PASSWORD | base64 --decode)
+          ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode)
           echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
 
       - name: Install ArgoCD CLI

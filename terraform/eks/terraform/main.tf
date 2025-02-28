@@ -1,13 +1,14 @@
 provider "aws" {
   region = "eu-west-1"
 }
-terraform {
-  backend "s3" {
-    bucket = "mariusb-tf-state"
-    key    = "terraform/state/terraform.tfstate"
-    region = "eu-west-1"
-  }
-}
+# terraform {
+#   required_version = "1.5.7"
+#   backend "s3" {
+#     bucket = "your-bucket-name"
+#     key    = "your-bucket-key"
+#     region = "eu-west-1"
+#   }
+# }
 
 locals {
   policies = ["arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
@@ -84,8 +85,8 @@ resource "aws_eks_node_group" "main" {
 
   scaling_config {
     desired_size = 2
-    max_size     = 5
-    min_size     = 2
+    max_size     = 3
+    min_size     = 1
   }
 
   tags = {

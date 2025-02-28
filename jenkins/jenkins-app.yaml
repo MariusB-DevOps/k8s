@@ -12,16 +12,19 @@ spec:
     helm:
       values: |
         controller:
-          serviceType: LoadBalancer  # Change to LoadBalancer
+          serviceType: ClusterIP
           ingress:
             enabled: true
             annotations:
               kubernetes.io/ingress.class: alb
-              alb.ingress.kubernetes.io/group.name: argocd-jenkins
+              alb.ingress.kubernetes.io/group.name: jenkins-alb
               alb.ingress.kubernetes.io/scheme: internet-facing
               alb.ingress.kubernetes.io/target-type: ip
               alb.ingress.kubernetes.io/backend-protocol: HTTP
-            hostName: jenkins.k8s.it.com
+              alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+            hosts:
+              - name: jenkins.k8s.it.com
+                path: /
   destination:
     server: https://kubernetes.default.svc
     namespace: jenkins

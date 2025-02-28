@@ -75,13 +75,17 @@ jobs:
       - name: Ensure Jenkins Namespace Exists
         run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Deploy Jenkins ALB
+        run: terraform apply -auto-approve
+        working-directory: jenkins/  
+          
       - name: Deploy Jenkins Using ArgoCD
         run: kubectl apply -f jenkins/jenkins-app.yaml
 
-      - name: Automate AWS Load Balancer and Route 53 for Jenkins
-        run: |
-          chmod +x scripts/setup-jenkins-lb.sh
-          scripts/setup-jenkins-lb.sh
+          #- name: Automate AWS Load Balancer and Route 53 for Jenkins
+          #        run: |
+          #          chmod +x scripts/setup-jenkins-lb.sh
+          #          scripts/setup-jenkins-lb.sh
 
 
 

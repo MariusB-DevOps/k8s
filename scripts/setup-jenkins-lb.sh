@@ -99,7 +99,7 @@ fi
 
 # 🔍 Retrieve the HTTPS Listener ARN
 LISTENER_ARN=$(aws elbv2 describe-listeners --load-balancer-arn "$LB_ARN" \
-  --query "Listeners[?Port==443].ListenerArn" --output text)
+  --query "Listeners[?Port==\`443\`].ListenerArn" --output text)
 
 if [[ -z "$LISTENER_ARN" ]]; then
   echo "❌ No existing HTTPS listener found on Load Balancer."

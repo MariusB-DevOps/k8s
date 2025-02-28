@@ -67,7 +67,7 @@ jobs:
           REPO_URL="${{ secrets.REPO_URL }}"
           GH_USERNAME="${{ secrets.GH_USERNAME }}"
           GH_TOKEN="${{ secrets.GH_TOKEN }}"
-          argocd repo add https://github.com/MariusB-DevOps/k8s --username "marius@osips.eu" --password "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" --type git --insecure-skip-server-verification
+          argocd repo add https://github.com/MariusB-DevOps/k8s --username "marius@osips.eu" --password "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" --type git --insecure-skip-server-verification
 
       - name: Deploy application
         run: kubectl apply -f argocd/config/argocd-app.yaml

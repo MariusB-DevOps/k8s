@@ -67,4 +67,4 @@ jobs:
           argocd repo add ${{ secrets.REPO_URL }} --username ${{ secrets.GH_USERNAME }} --password ${{ secrets.GH_TOKEN }} --type git
 
       - name: Deploy application
-        run: kubectl apply -f terraform/eks/argocd/config/argocd-app.yaml
+        run: kubectl apply -f argocd/config/argocd-app.yaml

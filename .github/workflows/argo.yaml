@@ -60,19 +60,11 @@ jobs:
 
       - name: Login to ArgoCD
         run: |
-          argocd login $ARGOCD_SERVER \
-            --username admin \
-            --password $ARGOCD_PASSWORD \
-            --insecure
-        env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          argocd login $ARGOCD_SERVER --username admin --password $ARGOCD_PASSWORD --insecure
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |
-          argocd repo add ${{ secrets.REPO_URL }} \
-            --username ${{ secrets.GH_USERNAME }} \
-            --password ${{ secrets.GH_TOKEN }} \
-            --type git
+          argocd repo add ${{ secrets.REPO_URL }} --username ${{ secrets.GH_USERNAME }} --password ${{ secrets.GH_TOKEN }} --type git
 
       - name: Deploy application
         run: kubectl apply -f terraform/eks/argocd/config/argocd-app.yaml

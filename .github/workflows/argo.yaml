@@ -64,7 +64,10 @@ jobs:
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |
-          argocd repo add ${{ secrets.REPO_URL }} --username ${{ secrets.GH_USERNAME }} --password ${{ secrets.GH_TOKEN }} --type git --insecure
+          REPO_URL="${{ secrets.REPO_URL }}"
+          GH_USERNAME="${{ secrets.GH_USERNAME }}"
+          GH_TOKEN="${{ secrets.GH_TOKEN }}"
+          argocd repo add "$REPO_URL" --username "$GH_USERNAME" --password "$GH_TOKEN" --type git --insecure
 
       - name: Deploy application
         run: kubectl apply -f argocd/config/argocd-app.yaml

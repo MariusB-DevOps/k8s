@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/MariusB-DevOps/k8s'
     targetRevision: HEAD
-    path: 'terraform/eks/argocd/app'
+    path: 'argocd/app'
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default

@@ -16,6 +16,11 @@ VALIDATION_RECORD=$(aws acm describe-certificate --certificate-arn $CERT_ARN --q
 RECORD_NAME=$(echo $VALIDATION_RECORD | jq -r '.Name')
 RECORD_VALUE=$(echo $VALIDATION_RECORD | jq -r '.Value')
 
+echo "HOSTED_ZONE_ID=$HOSTED_ZONE_ID"
+echo "CERT_ARN=$CERT_ARN"
+echo "DOMAIN_NAME=$DOMAIN_NAME"
+echo "LOAD_BALANCER_HOSTNAME=$LOAD_BALANCER_HOSTNAME"
+
 echo "Adding Route 53 record for validation..."
 aws route53 change-resource-record-sets --hosted-zone-id $HOSTED_ZONE_ID --change-batch '{
   "Changes": [{

@@ -12,12 +12,8 @@ jobs:
      run:
        shell: bash
        # We keep Terraform files in the terraform directory.
-<<<<<<< HEAD
-       working-directory: ./terraform/eks/terraform
-=======
        working-directory: ./terraform
->>>>>>> 8661955 (restructured all tf tree)
-    
+   
    steps:
      - name: Checkout the repository to the runner
        uses: actions/checkout@v2

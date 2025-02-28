@@ -32,6 +32,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Configure ArgoCD credentials
+        env:
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}  # For HTTPS access
+          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}            
+          REPO_URL: ${{ secrets.REPO_URL }}
+        run: |
+          # Add GitHub credentials to ArgoCD
+          argocd repo add "$REPO_URL" --username "$REPO_USERNAME" --password "$GITHUB_TOKEN"
+
       - name: Install kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -41,16 +50,5 @@ jobs:
       - name: Update kubeconfig
         run: aws eks --region eu-west-1 update-kubeconfig --name main-eks-cluster
 
-      #- name: Create Kubernetes secret
-      #  env:
-      #    REPO_URL: ${{ secrets.REPO_URL }}
-      #    REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
-      #    REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-      #  run: |
-      #    kubectl create secret generic my-github-secret \
-      #      --from-literal=username=$REPO_USERNAME \
-      #      --from-literal=password=$REPO_TOKEN \
-      #      -n argocd
-      
       - name: Deploy application
         run: kubectl apply -f terraform/eks/argocd/config/argocd-app.yaml

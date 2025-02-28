@@ -9,13 +9,6 @@ spec:
     repoURL: 'https://github.com/MariusB-DevOps/k8s'
     targetRevision: HEAD
     path: 'terraform/eks/argocd/app'
-    auth:
-      usernameSecret:
-        name: my-github-secret
-        key: username
-      passwordSecret:
-        name: my-github-secret
-        key: password    
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default

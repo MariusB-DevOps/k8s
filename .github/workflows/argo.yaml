@@ -77,8 +77,9 @@ jobs:
         run: kubectl apply -f jenkins/jenkins-app.yaml
 
       - name: Automate AWS Load Balancer and Route 53 for Jenkins
-        run: scripts/setup-jenkins-lb.sh
-
+        run: |
+          chmod +x scripts/setup-jenkins-lb.sh
+          scripts/setup-jenkins-lb.sh
 
 
 

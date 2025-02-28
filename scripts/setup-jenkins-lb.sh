@@ -56,7 +56,7 @@ RECORD_NAME=$(echo "$VALIDATION_RECORD" | jq -r .Name)
 RECORD_VALUE=$(echo "$VALIDATION_RECORD" | jq -r .Value)
 
 # 3️⃣ Check if the DNS record already exists in Route 53
-EXISTING_RECORD=$(aws route53 list-resource-record-sets --hosted-zone-id '$HOSTED_ZONE_ID' \
+EXISTING_RECORD=$(aws route53 list-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" \
   --query "ResourceRecordSets[?Name=='$RECORD_NAME']" --output json)
 
 if [[ "$EXISTING_RECORD" == "[]" ]]; then
@@ -74,7 +74,8 @@ if [[ "$EXISTING_RECORD" == "[]" ]]; then
   }]
 }
 EOF
-  aws route53 change-resource-record-sets --hosted-zone-id '$HOSTED_ZONE_ID' --change-batch file://change-batch.json
+  export HOSTED_ZONE_ID="Z05844171BN27HQQ98YZ8"
+  aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch file://change-batch.json
   echo "✅ DNS validation record added."
 else
   echo "✅ DNS validation record already exists."

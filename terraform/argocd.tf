@@ -34,7 +34,7 @@ resource "helm_release" "argocd" {
 
   set {
     name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-    value = "https"
+    value = "alb"
   }
 }
 

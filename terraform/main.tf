@@ -152,6 +152,26 @@ resource "aws_iam_role_policy_attachment" "eks_role_attachment" {
   policy_arn = each.value
 }
 
+resource "aws_route53_zone" "k8s_it_com" {
+  name = "k8s.it.com"
+}
+
+resource "aws_acm_certificate" "jenkins_cert" {
+  domain_name       = "jenkins.k8s.it.com"
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate" "argocd_cert" {
+  domain_name       = "argocd.k8s.it.com"
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 
 resource "aws_lb" "jenkins_alb" {
   name               = "jenkins-alb"
@@ -167,6 +187,41 @@ data "aws_acm_certificate" "jenkins_cert_issued" {
   domain     = aws_acm_certificate.jenkins_cert.domain_name
   statuses   = ["ISSUED"]
   depends_on = [aws_route53_record.jenkins_cert_validation] # Wait for validation to complete
+}
+
+resource "aws_route53_record" "jenkins_cert_validation" {
+
+  for_each = {
+    for dvo in aws_acm_certificate.jenkins_cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  zone_id = aws_route53_zone.k8s_it_com.zone_id
+  name    = each.value.name
+  type    = each.value.type
+  ttl     = 60
+  records = [each.value.record]
+
+}
+
+resource "aws_route53_record" "argocd_cert_validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.argocd_cert.domain_validation_options :
+    dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+
+  zone_id = aws_route53_zone.k8s_it_com.zone_id
+  name    = each.value.name
+  type    = each.value.type
+  records = [each.value.record]
+  ttl     = 60
 }
 
 resource "aws_lb_listener" "jenkins_https" {
@@ -196,36 +251,6 @@ resource "aws_lb_target_group" "jenkins_tg" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
   }
-}
-
-resource "aws_acm_certificate" "jenkins_cert" {
-  domain_name       = "jenkins.k8s.it.com"
-  validation_method = "DNS"
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_route53_zone" "k8s_it_com" {
-  name = "k8s.it.com"
-}
-
-resource "aws_route53_record" "jenkins_cert_validation" {
-
-  for_each = {
-    for dvo in aws_acm_certificate.jenkins_cert.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
-
-  zone_id = aws_route53_zone.k8s_it_com.zone_id
-  name    = each.value.name
-  type    = each.value.type
-  ttl     = 60
-  records = [each.value.record]
-
 }
 
 resource "aws_route53_record" "jenkins_dns" {

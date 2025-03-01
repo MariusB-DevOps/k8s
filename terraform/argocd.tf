@@ -34,9 +34,25 @@ resource "helm_release" "argocd" {
 
   set {
     name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-    value = "nlb"
+    value = "alb"
+  }
+
+  set {
+    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
+    value = aws_acm_certificate.argocd_cert.arn
+  }
+
+  set {
+    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-backend-protocol"
+    value = "HTTPS"
+  }
+
+  set {
+    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-ports"
+    value = "443"
   }
 }
+
 
 
 data "kubernetes_service" "argocd_server" {
@@ -45,4 +61,16 @@ data "kubernetes_service" "argocd_server" {
     namespace = helm_release.argocd.namespace
   }
 }
-###############
+
+resource "aws_route53_record" "argocd_dns" {
+  zone_id = aws_route53_zone.k8s_it_com.zone_id
+  name    = "argocd.k8s.it.com"
+  type    = "A"
+
+  alias {
+    name                   = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
+    zone_id                = "Z2FDTNDATAQYW2"
+    evaluate_target_health = true
+  }
+}
+

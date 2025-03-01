@@ -1,0 +1,83 @@
+name: Update and Email ArgoCD & Jenkins Secrets
+
+on:
+  workflow_run:
+    workflows:
+      - "ArgoCD workflow"
+    types:
+      - completed
+
+jobs:
+  retrieve-and-store-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region eu-west-1
+
+      - name: Set up kubectl
+        run: |
+          aws eks update-kubeconfig --name main-eks-cluster
+
+      - name: Retrieve ArgoCD Password
+        id: argocd-password
+        run: |
+          ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode)
+          echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
+
+      - name: Retrieve Jenkins Password
+        id: jenkins-password
+        run: |
+          JENKINS_PASSWORD=$(kubectl get secret jenkins -n jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode)
+          echo "JENKINS_PASSWORD=$JENKINS_PASSWORD" >> $GITHUB_ENV
+
+      - name: Retrieve ArgoCD Address
+        id: argocd-address
+        run: |
+          ARGOCD_ADDRESS=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "ARGOCD_ADDRESS=$ARGOCD_ADDRESS" >> $GITHUB_ENV
+
+      - name: Retrieve Jenkins Address
+        id: jenkins-address
+        run: |
+          JENKINS_ADDRESS=$(kubectl get svc jenkins -n jenkins -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "JENKINS_ADDRESS=$JENKINS_ADDRESS" >> $GITHUB_ENV
+
+      - name: Store Secrets in AWS Secrets Manager
+        run: |
+          aws secretsmanager put-secret-value --secret-id ArgoCDAdminPassword --secret-string "$ARGOCD_PASSWORD"
+          aws secretsmanager put-secret-value --secret-id JenkinsAdminPassword --secret-string "$JENKINS_PASSWORD"
+          aws secretsmanager put-secret-value --secret-id ArgoCDAddress --secret-string "$ARGOCD_ADDRESS"
+          aws secretsmanager put-secret-value --secret-id JenkinsAddress --secret-string "$JENKINS_ADDRESS"
+
+      - name: Update GitHub Secrets
+        run: |
+          echo "$ARGOCD_PASSWORD" | gh secret set ARGOCD_ADMIN_PASSWORD
+          echo "$JENKINS_PASSWORD" | gh secret set JENKINS_ADMIN_PASSWORD
+          echo "$ARGOCD_ADDRESS" | gh secret set ARGOCD_ADDRESS
+          echo "$JENKINS_ADDRESS" | gh secret set JENKINS_ADDRESS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.office365.com
+          server_port: 587
+          secure: true  
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Deployment Success: ArgoCD & Jenkins"
+          to: "marius@buricel.eu"
+          from: "GitHub Actions <no-reply@example.com>"
+          body: |
+            Deployment Completed Successfully!
+            
+            - **ArgoCD Address**: https://$ARGOCD_ADDRESS
+            - **ArgoCD Admin Password**: $ARGOCD_PASSWORD
+            
+            - **Jenkins Address**: https://$JENKINS_ADDRESS
+            - **Jenkins Admin Password**: $JENKINS_PASSWORD
+

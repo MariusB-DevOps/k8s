@@ -174,7 +174,7 @@ resource "aws_lb_listener" "jenkins_https" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.jenkins_cert.arn
+  certificate_arn   = data.aws_acm_certificate.jenkins_cert_issued.arn
 
   default_action {
     type             = "forward"
@@ -211,14 +211,14 @@ resource "aws_route53_zone" "k8s_it_com" {
 }
 
 resource "aws_route53_record" "jenkins_cert_validation" {
-  depends_on = [aws_acm_certificate.jenkins_cert] # Ensures ACM is created first
+  depends_on = [aws_route53_zone.k8s_it_com,aws_acm_certificate.jenkins_cert] # Ensures ACM is created first
 
   for_each = {
     for dvo in aws_acm_certificate.jenkins_cert.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
-    }
+    } if dvo.resource_record_name != ""
   }
 
   zone_id = aws_route53_zone.k8s_it_com.zone_id

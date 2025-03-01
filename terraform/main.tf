@@ -164,9 +164,9 @@ resource "aws_lb" "jenkins_alb" {
 }
 
 data "aws_acm_certificate" "jenkins_cert_issued" {
-  domain   = aws_acm_certificate.jenkins_cert.domain_name
-  statuses = ["ISSUED"]
-  depends_on = [aws_route53_record.jenkins_cert_validation]  # Wait for validation to complete
+  domain     = aws_acm_certificate.jenkins_cert.domain_name
+  statuses   = ["ISSUED"]
+  depends_on = [aws_route53_record.jenkins_cert_validation] # Wait for validation to complete
 }
 
 resource "aws_lb_listener" "jenkins_https" {

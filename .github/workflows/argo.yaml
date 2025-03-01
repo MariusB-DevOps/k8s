@@ -55,19 +55,19 @@ jobs:
 
       - name: Initialize Terraform for ArgoCD
         run: terraform init
-        working-directory: terraform/argocd
+        working-directory: argocd
 
       - name: Apply Terraform for ArgoCD
         run: terraform apply -auto-approve
-        working-directory: terraform/argocd
+        working-directory: argocd
 
       - name: Initialize Terraform for Jenkins
         run: terraform init
-        working-directory: terraform/jenkins
+        working-directory: jenkins
 
       - name: Apply Terraform for Jenkins
         run: terraform apply -auto-approve
-        working-directory: terraform/jenkins
+        working-directory: jenkins
 
       - name: Retrieve ArgoCD Server Address
         run: |

@@ -3,10 +3,6 @@ output "eks_connect" {
 }
 
 output "eks_cluster_name" {
-  value = aws_eks_cluster.main.name
-}
-
-output "eks_cluster_name" {
   description = "The name of the EKS cluster"
   value       = aws_eks_cluster.main.name
 }

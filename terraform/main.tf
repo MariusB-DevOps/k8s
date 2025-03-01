@@ -163,6 +163,12 @@ resource "aws_lb" "jenkins_alb" {
   enable_deletion_protection = false
 }
 
+data "aws_acm_certificate" "jenkins_cert_issued" {
+  domain   = aws_acm_certificate.jenkins_cert.domain_name
+  statuses = ["ISSUED"]
+  depends_on = [aws_route53_record.jenkins_cert_validation]  # Wait for validation to complete
+}
+
 resource "aws_lb_listener" "jenkins_https" {
   load_balancer_arn = aws_lb.jenkins_alb.arn
   port              = 443

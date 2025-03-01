@@ -211,7 +211,7 @@ resource "aws_route53_zone" "k8s_it_com" {
 }
 
 resource "aws_route53_record" "jenkins_cert_validation" {
-  depends_on = [aws_route53_zone.k8s_it_com,aws_acm_certificate.jenkins_cert] # Ensures ACM is created first
+  depends_on = [aws_route53_zone.k8s_it_com, aws_acm_certificate.jenkins_cert] # Ensures ACM is created first
 
   for_each = {
     for dvo in aws_acm_certificate.jenkins_cert.domain_validation_options : dvo.domain_name => {

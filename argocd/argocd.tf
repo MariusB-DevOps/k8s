@@ -37,6 +37,7 @@ resource "helm_release" "argocd" {
   create_namespace = true
   force_update     = true
   recreate_pods    = false
+  replace          = false
 
   set {
     name  = "server.service.type"

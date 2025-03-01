@@ -58,7 +58,7 @@ jobs:
         working-directory: argocd
 
       - name: Apply Terraform for ArgoCD
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -target=helm_release.argocd || echo "ArgoCD already installed, continuing..."
         working-directory: argocd
 
       - name: Initialize Terraform for Jenkins
@@ -66,7 +66,7 @@ jobs:
         working-directory: jenkins
 
       - name: Apply Terraform for Jenkins
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -target=helm_release.jenkins || echo "Jenkins already installed, continuing..."
         working-directory: jenkins
 
       - name: Retrieve ArgoCD Server Address

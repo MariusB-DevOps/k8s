@@ -15,6 +15,14 @@ resource "helm_release" "jenkins" {
 
   namespace        = "jenkins"
   create_namespace = true
+  force_update  = true   # Forces update if the chart has changes
+  atomic        = true   # Ensures safe rollback if update fails
+  cleanup_on_fail = true # Deletes failed installs automatically
+  recreate_pods = false  # Avoids pod restarts if unnecessary
+
+  lifecycle {
+    ignore_changes = [version]
+  }
 
   set {
     name  = "controller.serviceType"

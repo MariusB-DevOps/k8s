@@ -35,9 +35,15 @@ resource "helm_release" "argocd" {
   namespace = "argocd"
 
   create_namespace = true
-  force_update     = true
-  recreate_pods    = false
-  replace          = false
+  force_update     = true  # Forces update if the chart has changes
+  atomic           = true  # Ensures safe rollback if update fails
+  cleanup_on_fail  = true  # Deletes failed installs automatically
+  recreate_pods    = false # Avoids pod restarts if unnecessary
+
+  # Helm annotations to prevent Terraform from breaking on existing installations
+  lifecycle {
+    ignore_changes = [version]
+  }
 
   set {
     name  = "server.service.type"

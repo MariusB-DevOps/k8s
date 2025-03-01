@@ -1,3 +1,13 @@
+data "terraform_remote_state" "eks" {
+  backend = "s3"
+
+  config = {
+    bucket = "mariusb-tf-state"
+    key    = "terraform/state/terraform.tfstate"
+    region = "eu-west-1"
+  }
+}
+
 resource "helm_release" "jenkins" {
   name       = "jenkins"
   repository = "https://charts.jenkins.io"
@@ -32,15 +42,23 @@ resource "helm_release" "jenkins" {
   }
 }
 
+data "kubernetes_service" "jenkins_service" {
+  metadata {
+    name      = "jenkins"
+    namespace = helm_release.jenkins.namespace
+  }
+}
+
 resource "aws_route53_record" "jenkins_dns" {
   zone_id = var.hosted_zone_id
   name    = "jenkins.k8s.it.com"
   type    = "A"
 
   alias {
-    name                   = aws_lb.jenkins_lb.dns_name
-    zone_id                = aws_lb.jenkins_lb.zone_id
+    name                   = data.kubernetes_service.jenkins_service.status[0].load_balancer[0].ingress[0].hostname
+    zone_id                = var.hosted_zone_id
     evaluate_target_health = false
   }
 }
+
 

@@ -1,23 +1,32 @@
+data "terraform_remote_state" "eks" {
+  backend = "s3"
+
+  config = {
+    bucket = "mariusb-tf-state"
+    key    = "terraform/state/terraform.tfstate"
+    region = "eu-west-1"
+  }
+}
+
 provider "kubernetes" {
-  host                   = aws_eks_cluster.main.endpoint
+  host                   = data.terraform_remote_state.eks.outputs.eks_cluster_endpoint
   token                  = data.aws_eks_cluster_auth.main.token
-  cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
+  cluster_ca_certificate = base64decode(data.terraform_remote_state.eks.outputs.eks_cluster_certificate_authority)
 }
 
 provider "helm" {
   kubernetes {
-    host                   = aws_eks_cluster.main.endpoint
+    host                   = data.terraform_remote_state.eks.outputs.eks_cluster_endpoint
     token                  = data.aws_eks_cluster_auth.main.token
-    cluster_ca_certificate = base64decode(aws_eks_cluster.main.certificate_authority[0].data)
+    cluster_ca_certificate = base64decode(data.terraform_remote_state.eks.outputs.eks_cluster_certificate_authority)
   }
 }
 
 data "aws_eks_cluster_auth" "main" {
-  name = aws_eks_cluster.main.name
+  name = data.terraform_remote_state.eks.outputs.eks_cluster_name
 }
 
 resource "helm_release" "argocd" {
-  depends_on = [aws_eks_node_group.main]
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
@@ -53,6 +62,9 @@ resource "helm_release" "argocd" {
   }
 }
 
+output "argocd_alb_hostname" {
+  value = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
+}
 
 
 data "kubernetes_service" "argocd_server" {
@@ -68,8 +80,8 @@ resource "aws_route53_record" "argocd_dns" {
   type    = "A"
 
   alias {
-    name                   = aws_lb.argocd_lb.dns_name
-    zone_id                = aws_lb.argocd_lb.zone_id
+    name                   = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
+    zone_id                = data.kubernetes_service.argocd_server.metadata[0].uid
     evaluate_target_health = true
   }
 }

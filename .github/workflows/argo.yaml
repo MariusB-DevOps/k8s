@@ -12,7 +12,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      TF_VAR_hosted_zone_id: ${{ secrets.AWS_HOSTED_ZONE_ID }}
+      TF_VAR_certificate_arn: ${{ secrets.AWS_CERTIFICATE_ARN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -25,28 +27,39 @@ jobs:
             exit 1
           fi
 
-          #      - name: Setup Terraform with specified version on the runner
-          #        uses: hashicorp/setup-terraform@v3
-          #        with:
-          #          terraform_version: 1.5.7
-          #          terraform_wrapper: false
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name main-eks-cluster
+
+      - name: Ensure Jenkins Namespace Exists
+        run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
+
           
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Initialize Terraform
+        run: terraform init -reconfigure
+        working-directory: terraform
+
+      - name: Apply Terraform for ArgoCD and Jenkins
+        run: terraform apply -auto-approve -target=helm_release.argocd -target=helm_release.jenkins
+        working-directory: terraform/
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/            
-
-      - name: Configure kubectl
-        run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name main-eks-cluster
 
       - name: Retrieve ArgoCD Server Address
         run: |
@@ -70,46 +83,10 @@ jobs:
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |
-          REPO_URL="${{ secrets.REPO_URL }}"
-          GH_USERNAME="${{ secrets.GH_USERNAME }}"
-          GH_TOKEN="${{ secrets.GH_TOKEN }}"
-          argocd repo add https://github.com/MariusB-DevOps/k8s --username "marius@osips.eu" --password "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" --type git --insecure-skip-server-verification
+          argocd repo add https://github.com/MariusB-DevOps/k8s \
+            --username "${{ secrets.GH_USERNAME }}" \
+            --password "${{ secrets.GH_TOKEN }}" \
+            --type git --insecure-skip-server-verification
 
       - name: Deploy application
         run: kubectl apply -f argocd/config/argocd-app.yaml
-
-      - name: Ensure Jenkins Namespace Exists
-        run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
-
-          #      - name: TF Init
-          #        run: terraform init -reconfigure 
-          #        working-directory: jenkins/
-
-          #      - name: TF Validate
-          #        run: terraform validate 
-          #        working-directory: jenkins/
-          
-          #      - name: Deploy Jenkins ALB
-          #        run: terraform apply -auto-approve
-          #        working-directory: jenkins/  
-          
-      - name: Deploy Jenkins Using ArgoCD
-        run: kubectl apply -f jenkins/jenkins-app.yaml
-
-          #- name: Automate AWS Load Balancer and Route 53 for Jenkins
-          #        run: |
-          #          chmod +x scripts/setup-jenkins-lb.sh
-          #          scripts/setup-jenkins-lb.sh
-
-
-
-
-
-
-
-
-
-
-
-
-

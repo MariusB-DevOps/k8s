@@ -39,7 +39,7 @@ resource "helm_release" "argocd" {
 
   set {
     name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
-    value = aws_acm_certificate.argocd_cert.arn
+    value = var.certificate_arn
   }
 
   set {
@@ -63,13 +63,13 @@ data "kubernetes_service" "argocd_server" {
 }
 
 resource "aws_route53_record" "argocd_dns" {
-  zone_id = aws_route53_zone.k8s_it_com.zone_id
+  zone_id = var.hosted_zone_id
   name    = "argocd.k8s.it.com"
   type    = "A"
 
   alias {
-    name                   = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
-    zone_id                = "Z2FDTNDATAQYW2"
+    name                   = aws_lb.argocd_lb.dns_name
+    zone_id                = aws_lb.argocd_lb.zone_id
     evaluate_target_health = true
   }
 }

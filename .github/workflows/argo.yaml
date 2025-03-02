@@ -53,6 +53,13 @@ jobs:
         with:
           terraform_version: latest
 
+      - name: Debug Terraform ALB Hostname
+        run: |
+          echo "Checking Terraform State for ALB Hostname..."
+          terraform state pull | grep argocd_alb_hostname || echo "argocd_alb_hostname not found!"
+          terraform output argocd_alb_hostname || echo "Terraform output missing ALB!"
+          terraform output jenkins_alb_hostname || echo "Terraform output missing Jenkins ALB!"
+            
       - name: Initialize Terraform for ArgoCD
         run: terraform init
         working-directory: argocd

@@ -32,24 +32,18 @@ jobs:
           JENKINS_PASSWORD=$(kubectl get secret jenkins -n jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode)
           echo "JENKINS_PASSWORD=$JENKINS_PASSWORD" >> $GITHUB_ENV
 
-      - name: Retrieve ArgoCD Address
-        id: argocd-address
+      - name: Retrieve ALB Hostnames from AWS SSM
+        id: retrieve-alb-hostnames
         run: |
-          ARGOCD_ADDRESS=$(terraform output -raw argocd_url)          
-          echo "ARGOCD_ADDRESS=$ARGOCD_ADDRESS" >> $GITHUB_ENV
-
-      - name: Retrieve Jenkins Address
-        id: jenkins-address
-        run: |
-          JENKINS_ADDRESS=$(terraform output -raw jenkins_url)          
-          echo "JENKINS_ADDRESS=$JENKINS_ADDRESS" >> $GITHUB_ENV
+          ARGOCD_ALB_HOSTNAME=$(aws ssm get-parameter --name "/terraform/argocd_alb_hostname" --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
+          JENKINS_ALB_HOSTNAME=$(aws ssm get-parameter --name "/terraform/jenkins_alb_hostname" --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
+          echo "ARGOCD_ALB_HOSTNAME=$ARGOCD_ALB_HOSTNAME" >> $GITHUB_ENV
+          echo "JENKINS_ALB_HOSTNAME=$JENKINS_ALB_HOSTNAME" >> $GITHUB_ENV
 
       - name: Store Secrets in AWS Secrets Manager
         run: |
           aws secretsmanager put-secret-value --secret-id ArgoCDAdminPassword --secret-string "$ARGOCD_PASSWORD"
           aws secretsmanager put-secret-value --secret-id JenkinsAdminPassword --secret-string "$JENKINS_PASSWORD"
-          aws secretsmanager put-secret-value --secret-id ArgoCDAddress --secret-string "$ARGOCD_ADDRESS"
-          aws secretsmanager put-secret-value --secret-id JenkinsAddress --secret-string "$JENKINS_ADDRESS"
 
       - name: Update GitHub Secrets
         run: |
@@ -72,11 +66,19 @@ jobs:
           to: "marius@buricel.eu"
           from: "GitHub Actions <no-reply@example.com>"
           body: |
-            Deployment Completed Successfully!
-            
-            - **ArgoCD Address**: https://$ARGOCD_ADDRESS
-            - **ArgoCD Admin Password**: $ARGOCD_PASSWORD
-            
-            - **Jenkins Address**: https://$JENKINS_ADDRESS
-            - **Jenkins Admin Password**: $JENKINS_PASSWORD
+            Hello,
 
+            Your ArgoCD and Jenkins servers have been set up successfully. Here are the access details:
+
+            ArgoCD:
+            URL: https://$ARGOCD_ALB_HOSTNAME
+            Username: admin
+            Password: $ARGOCD_PASSWORD
+
+            Jenkins:
+            URL: https://$JENKINS_ALB_HOSTNAME
+            Username: admin
+            Password: $JENKINS_PASSWORD
+
+            Regards,
+            Your DevOps Team            

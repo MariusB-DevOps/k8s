@@ -60,10 +60,10 @@ resource "helm_release" "argocd" {
     value = "argocd.k8s.it.com"
   }
 
-set {
-  name  = "server.ingress.ingressClassName"
-  value = "alb"
-}
+  set {
+    name  = "server.ingress.ingressClassName"
+    value = "alb"
+  }
 
   set {
     name  = "server.ingress.annotations.kubernetes.io/ingress.class"

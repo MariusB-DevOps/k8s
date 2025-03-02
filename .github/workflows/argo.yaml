@@ -44,56 +44,51 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name main-eks-cluster
 
-      - name: Ensure Jenkins Namespace Exists
-        run: kubectl create namespace jenkins --dry-run=client -o yaml | kubectl apply -f -
+      - name: Set up AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y awscli
 
+      - name: Retrieve ALB Names from AWS SSM
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "Fetching ALB Names from AWS SSM..."
+          ARGOCD_ALB_NAME=$(aws ssm get-parameter --name "/terraform/argocd_alb_name" --query "Parameter.Value" --output text --region $AWS_REGION)
+          JENKINS_ALB_NAME=$(aws ssm get-parameter --name "/terraform/jenkins_alb_name" --query "Parameter.Value" --output text --region $AWS_REGION)
+
+          echo "ARGOCD_ALB_NAME=$ARGOCD_ALB_NAME" >> $GITHUB_ENV
+          echo "JENKINS_ALB_NAME=$JENKINS_ALB_NAME" >> $GITHUB_ENV
+
+      - name: Deploy ArgoCD
+        run: |
+          sed -i "s/PLACEHOLDER_ARGOCD_ALB_NAME/$ARGOCD_ALB_NAME/g" argocd/service.yaml
+          kubectl apply -f argocd/namespace.yaml
+          kubectl apply -f argocd/install.yaml
+          kubectl apply -f argocd/service.yaml
+
+      - name: Deploy Jenkins
+        run: |
+          sed -i "s/PLACEHOLDER_JENKINS_ALB_NAME/$JENKINS_ALB_NAME/g" jenkins/service.yaml
+          kubectl apply -f jenkins/namespace.yaml
+          kubectl apply -f jenkins/deployment.yaml
+          kubectl apply -f jenkins/service.yaml
           
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: latest
-
-      - name: Initialize Terraform for ArgoCD
-        run: terraform init
-        working-directory: argocd
-
-      - name: Apply Terraform for ArgoCD
-        run: terraform apply -auto-approve -target=helm_release.argocd || echo "ArgoCD already installed, continuing..."
-        working-directory: argocd
-
-      - name: Initialize Terraform for Jenkins
-        run: terraform init
-        working-directory: jenkins
-
-      - name: Apply Terraform for Jenkins
-        run: terraform apply -auto-approve -target=helm_release.jenkins || echo "Jenkins already installed, continuing..."
-        working-directory: jenkins
-
-      - name: Retrieve ArgoCD LoadBalancer Hostname from Kubernetes
-        run: |
-          ARGOCD_SERVER=""
-          while [[ -z "$ARGOCD_SERVER" ]]; do
-            echo "Waiting for ArgoCD ALB to be assigned..."
-            sleep 10
-            ARGOCD_SERVER=$(kubectl get ingress -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || echo "")
-          done
-          echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> $GITHUB_ENV
-          echo "ArgoCD is available at https://$ARGOCD_SERVER"
-
-      - name: Retrieve and Decode ArgoCD Admin Password from Cluster Secret
-        run: |
-          ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode)
-          echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
-
       - name: Install ArgoCD CLI
         run: |
           curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           chmod +x argocd-linux-amd64
           sudo mv argocd-linux-amd64 /usr/local/bin/argocd
 
+      - name: Retrieve ArgoCD Admin Password
+        run: |
+          ARGOCD_PASSWORD=$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode)
+          echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
+
       - name: Login to ArgoCD
         run: |
-          argocd login $ARGOCD_SERVER --username admin --password $ARGOCD_PASSWORD --insecure --skip-test-tls --grpc-web
+          echo "Logging in to ArgoCD..."
+          argocd login $ARGOCD_ALB_HOSTNAME --username admin --password $ARGOCD_PASSWORD --insecure
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |

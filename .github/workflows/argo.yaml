@@ -93,7 +93,7 @@ jobs:
       - name: Login to ArgoCD
         run: |
           echo "Logging in to ArgoCD..."
-          argocd login $ARGOCD_ALB_HOSTNAME --username admin --password $ARGOCD_PASSWORD --insecure
+          argocd login $ARGOCD_ALB_NAME --username admin --password $ARGOCD_PASSWORD --insecure
 
       - name: Add Private GitHub Repo to ArgoCD
         run: |

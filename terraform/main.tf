@@ -215,11 +215,11 @@ resource "aws_lb" "argocd_alb" {
 }
 
 resource "aws_lb_target_group" "argocd_tg" {
-  name     = "argocd-tg"
-  port     = 443
-  protocol = "HTTPS"
-  vpc_id   = aws_vpc.main.id
-
+  name        = "argocd-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
   health_check {
     path                = "/"
     interval            = 30
@@ -256,10 +256,11 @@ resource "aws_lb" "jenkins_alb" {
 }
 
 resource "aws_lb_target_group" "jenkins_tg" {
-  name     = "jenkins-tg"
-  port     = 443
-  protocol = "HTTPS"
-  vpc_id   = aws_vpc.main.id
+  name        = "jenkins-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
 
   health_check {
     path                = "/login"

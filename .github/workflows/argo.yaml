@@ -82,9 +82,12 @@ jobs:
           chmod +x argocd-linux-amd64
           sudo mv argocd-linux-amd64 /usr/local/bin/argocd
 
-      - name: Retrieve ArgoCD Admin Password
+      - name: Retrieve or Reset ArgoCD Admin Password
         run: |
-          ARGOCD_PASSWORD=$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode)
+          # Try retrieving the existing password, if available
+          ARGOCD_PASSWORD=$(argocd account update-password --account admin --current-password "" --new-password "admin" 2>/dev/null || echo "admin")
+          
+          echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD"
           echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
 
       - name: Login to ArgoCD

@@ -56,8 +56,8 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           echo "Fetching ALB Names from AWS SSM..."
-          ARGOCD_ALB_NAME=$(aws ssm get-parameter --name "/terraform/argocd_alb_name" --query "Parameter.Value" --output text --region eu-west-1)
-          JENKINS_ALB_NAME=$(aws ssm get-parameter --name "/terraform/jenkins_alb_name" --query "Parameter.Value" --output text --region eu-west-1)
+          ARGOCD_ALB_NAME=$(aws ssm get-parameter --name "/terraform/argocd_alb_hostname" --query "Parameter.Value" --output text --region eu-west-1)
+          JENKINS_ALB_NAME=$(aws ssm get-parameter --name "/terraform/jenkins_alb_hostname" --query "Parameter.Value" --output text --region eu-west-1)
 
           echo "ARGOCD_ALB_NAME=$ARGOCD_ALB_NAME" >> $GITHUB_ENV
           echo "JENKINS_ALB_NAME=$JENKINS_ALB_NAME" >> $GITHUB_ENV

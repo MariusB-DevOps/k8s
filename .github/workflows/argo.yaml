@@ -2,12 +2,9 @@ name: ArgoCD workflow
 
 on:
   workflow_run:
-    workflows: ["Terraform workflow"]
+    workflows: ["Terraform Workflow"]
     types:
       - completed
-  push:
-    paths:
-      - 'argocd/**'  
 
 jobs:
   deploy:

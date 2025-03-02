@@ -2,10 +2,9 @@ name: Update and Email ArgoCD & Jenkins Secrets
 
 on:
   workflow_run:
-    workflows:
-      - "ArgoCD workflow"
+    workflows: ["ArgoCD workflow"]
     types:
-      - completed
+      - completed  
 
 jobs:
   retrieve-and-store-secrets:

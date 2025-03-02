@@ -23,10 +23,10 @@ provider "helm" {
 }
 
 resource "helm_release" "argocd" {
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  namespace  = "argocd"
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
   create_namespace = true
 
   set {
@@ -45,12 +45,12 @@ resource "helm_release" "argocd" {
   }
 
   set {
-    name  = "server.ingress.annotations.kubernetes\.io/ingress\.class"
+    name  = "server.ingress.annotations.kubernetes.io/ingress.class"
     value = "alb"
   }
 
   set {
-    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/scheme"
+    name  = "server.ingress.annotations.alb.ingress.kubernetes.io/scheme"
     value = "internet-facing"
   }
 
@@ -60,12 +60,12 @@ resource "helm_release" "argocd" {
   }
 
   set {
-    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/certificate-arn"
+    name  = "server.ingress.annotations.alb.ingress.kubernetes.io/certificate-arn"
     value = var.certificate_arn
   }
 
   set {
-    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/target-type"
+    name  = "server.ingress.annotations.alb.ingress.kubernetes.io/target-type"
     value = "ip"
   }
 }

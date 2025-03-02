@@ -188,7 +188,7 @@ resource "aws_lb_listener" "argocd_listener" {
   certificate_arn   = var.certificate_arn
 
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.argocd_tg.arn
   }
 }
@@ -229,7 +229,7 @@ resource "aws_lb_listener" "jenkins_listener" {
   certificate_arn   = var.certificate_arn
 
   default_action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.jenkins_tg.arn
   }
 }

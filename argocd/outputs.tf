@@ -7,6 +7,6 @@ output "argocd_alb_hostname" {
 }
 
 output "argocd_initial_admin_secret" {
-  value = kubernetes_secret.argocd_admin.data["password"]
+  value     = kubernetes_secret.argocd_admin.data["password"]
   sensitive = true
 }

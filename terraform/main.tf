@@ -325,7 +325,7 @@ resource "aws_ssm_parameter" "jenkins_alb_hostname" {
 resource "aws_iam_policy" "aws_lb_controller_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "IAM policy for AWS ALB Ingress Controller"
-  policy      = file("iam-policies/aws-lb-controller-policy.json")  # Load policy from a separate file
+  policy      = file("iam-policies/aws-lb-controller-policy.json") # Load policy from a separate file
 }
 
 resource "aws_iam_role" "aws_lb_controller_role" {

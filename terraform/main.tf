@@ -325,12 +325,12 @@ resource "aws_ssm_parameter" "jenkins_alb_hostname" {
 resource "aws_iam_policy" "aws_lb_controller_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "IAM policy for AWS ALB Ingress Controller"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "ec2:DescribeInstances",
           "ec2:DescribeTags",
           "ec2:DescribeVpcs",

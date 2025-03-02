@@ -55,7 +55,17 @@ jobs:
     
      - name: Terraform Apply
        run: terraform apply -auto-approve -input=false
-  
+
+     - name: Install kubectl
+       run: |
+         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+         chmod +x kubectl
+         sudo mv kubectl /usr/local/bin/
+
+     - name: Configure kubectl
+       run: |
+         aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name main-eks-cluster
+
      - name: Install AWS ALB Ingress Controller
        run: |
          echo "Installing AWS ALB Ingress Controller..."

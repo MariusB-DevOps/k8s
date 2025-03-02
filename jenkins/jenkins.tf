@@ -26,47 +26,42 @@ resource "helm_release" "jenkins" {
 
   set {
     name  = "controller.serviceType"
-    value = "LoadBalancer"
+    value = "ClusterIP"
   }
 
   set {
-    name  = "controller.serviceAnnotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+    name  = "controller.ingress.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "controller.ingress.hosts[0].host"
+    value = "jenkins.k8s.it.com"
+  }
+
+  set {
+    name  = "controller.ingress.annotations.kubernetes\\.io/ingress\\.class"
     value = "alb"
   }
 
   set {
-    name  = "controller.serviceAnnotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme"
+    value = "internet-facing"
+  }
+
+  set {
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/load-balancer-name"
+    value = data.terraform_remote_state.alb.outputs.jenkins_alb_hostname
+  }
+
+  set {
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
     value = var.certificate_arn
   }
 
   set {
-    name  = "controller.serviceAnnotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-backend-protocol"
-    value = "HTTPS"
-  }
-
-  set {
-    name  = "controller.serviceAnnotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-ports"
-    value = "443"
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type"
+    value = "ip"
   }
 }
-
-data "kubernetes_service" "jenkins_service" {
-  metadata {
-    name      = "jenkins"
-    namespace = helm_release.jenkins.namespace
-  }
-}
-
-resource "aws_route53_record" "jenkins_dns" {
-  zone_id = var.hosted_zone_id
-  name    = "jenkins.k8s.it.com"
-  type    = "A"
-
-  alias {
-    name                   = data.kubernetes_service.jenkins_service.status[0].load_balancer[0].ingress[0].hostname
-    zone_id                = var.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
 

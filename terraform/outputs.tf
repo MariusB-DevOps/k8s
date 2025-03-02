@@ -17,3 +17,19 @@ output "eks_cluster_certificate_authority" {
   value       = aws_eks_cluster.main.certificate_authority[0].data
 }
 
+output "argocd_alb_hostname" {
+  value = aws_lb.argocd_alb.dns_name
+}
+
+output "jenkins_alb_hostname" {
+  value = aws_lb.jenkins_alb.dns_name
+}
+
+output "argocd_url" {
+  value = "https://argocd.k8s.it.com"
+}
+
+output "jenkins_url" {
+  value = "https://jenkins.k8s.it.com"
+}
+

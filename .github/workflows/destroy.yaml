@@ -39,7 +39,12 @@ jobs:
 
      - name: Update kubeconfig
        run: aws eks --region eu-west-1 update-kubeconfig --name main-eks-cluster
-      
+
+     - name: Remove Route 53 Records
+       run: |
+         terraform state rm aws_route53_record.argocd_dns
+         terraform state rm aws_route53_record.jenkins_dns
+
      - name: Deploy application
        run: | 
           kubectl delete -f ../argocd/config/argocd-app.yaml || true

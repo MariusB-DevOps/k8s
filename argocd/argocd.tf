@@ -22,76 +22,51 @@ provider "helm" {
   }
 }
 
-data "aws_eks_cluster_auth" "main" {
-  name = data.terraform_remote_state.eks.outputs.eks_cluster_name
-}
-
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = "4.5.2"
-
-  namespace = "argocd"
-
+  namespace  = "argocd"
   create_namespace = true
-  force_update     = true  # Forces update if the chart has changes
-  atomic           = true  # Ensures safe rollback if update fails
-  cleanup_on_fail  = true  # Deletes failed installs automatically
-  recreate_pods    = false # Avoids pod restarts if unnecessary
-
-  # Helm annotations to prevent Terraform from breaking on existing installations
-  lifecycle {
-    ignore_changes = [version]
-  }
 
   set {
     name  = "server.service.type"
-    value = "LoadBalancer"
+    value = "ClusterIP"
   }
 
   set {
-    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+    name  = "server.ingress.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "server.ingress.hosts[0]"
+    value = "argocd.k8s.it.com"
+  }
+
+  set {
+    name  = "server.ingress.annotations.kubernetes\.io/ingress\.class"
     value = "alb"
   }
 
   set {
-    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
+    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/scheme"
+    value = "internet-facing"
+  }
+
+  set {
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/load-balancer-name"
+    value = data.terraform_remote_state.alb.outputs.argocd_alb_hostname
+  }
+
+  set {
+    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/certificate-arn"
     value = var.certificate_arn
   }
 
   set {
-    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-backend-protocol"
-    value = "HTTPS"
-  }
-
-  set {
-    name  = "server.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-ports"
-    value = "443"
-  }
-}
-
-output "argocd_alb_hostname" {
-  value = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
-}
-
-
-data "kubernetes_service" "argocd_server" {
-  metadata {
-    name      = "argocd-server"
-    namespace = helm_release.argocd.namespace
-  }
-}
-
-resource "aws_route53_record" "argocd_dns" {
-  zone_id = var.hosted_zone_id
-  name    = "argocd.k8s.it.com"
-  type    = "A"
-
-  alias {
-    name                   = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].hostname
-    zone_id                = data.kubernetes_service.argocd_server.metadata[0].uid
-    evaluate_target_health = true
+    name  = "server.ingress.annotations.alb\.ingress\.kubernetes\.io/target-type"
+    value = "ip"
   }
 }
 

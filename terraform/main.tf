@@ -152,4 +152,112 @@ resource "aws_iam_role_policy_attachment" "eks_role_attachment" {
   policy_arn = each.value
 }
 
+# ArgoCD ALB
+resource "aws_lb" "argocd_alb" {
+  name               = "argocd-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.argocd_alb_sg.id]
+  subnets            = aws_subnet.public[*].id
+
+  tags = {
+    Name = "argocd-alb"
+  }
+}
+
+resource "aws_lb_target_group" "argocd_tg" {
+  name     = "argocd-tg"
+  port     = 443
+  protocol = "HTTPS"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_listener" "argocd_listener" {
+  load_balancer_arn = aws_lb.argocd_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.certificate_arn
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.argocd_tg.arn
+  }
+}
+
+# Jenkins ALB
+resource "aws_lb" "jenkins_alb" {
+  name               = "jenkins-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.jenkins_alb_sg.id]
+  subnets            = aws_subnet.public[*].id
+
+  tags = {
+    Name = "jenkins-alb"
+  }
+}
+
+resource "aws_lb_target_group" "jenkins_tg" {
+  name     = "jenkins-tg"
+  port     = 443
+  protocol = "HTTPS"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path                = "/login"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_listener" "jenkins_listener" {
+  load_balancer_arn = aws_lb.jenkins_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.certificate_arn
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.jenkins_tg.arn
+  }
+}
+
+# Route 53 record for ArgoCD
+resource "aws_route53_record" "argocd_dns" {
+  zone_id = var.hosted_zone_id
+  name    = "argocd.k8s.it.com"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.argocd_alb.dns_name
+    zone_id                = aws_lb.argocd_alb.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# Route 53 record for Jenkins
+resource "aws_route53_record" "jenkins_dns" {
+  zone_id = var.hosted_zone_id
+  name    = "jenkins.k8s.it.com"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.jenkins_alb.dns_name
+    zone_id                = aws_lb.jenkins_alb.zone_id
+    evaluate_target_health = true
+  }
+}
+
 ########## Dummy change to trigger workflow

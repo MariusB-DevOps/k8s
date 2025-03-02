@@ -62,9 +62,14 @@ jobs:
        id: tf_output
        run: |
           terraform output -raw eks_connect > eks_connect.txt
-
+          terraform output -raw argocd_alb_hostname > argocd_alb_hostname.txt
+          terraform output -raw jenkins_alb_hostname > jenkins_alb_hostname.txt
+          
      - name: Upload Terraform Output Artifact
        uses: actions/upload-artifact@v4
        with:
           name: terraform-output
-          path: ./terraform/eks_connect.txt
+          path: |
+            ./terraform/eks_connect.txt
+            ./terraform/argocd_alb_hostname.txt
+            ./terraform/jenkins_alb_hostname.txt            

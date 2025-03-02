@@ -36,13 +36,13 @@ jobs:
       - name: Retrieve ArgoCD Address
         id: argocd-address
         run: |
-          ARGOCD_ADDRESS=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          ARGOCD_ADDRESS=$(terraform output -raw argocd_url)          
           echo "ARGOCD_ADDRESS=$ARGOCD_ADDRESS" >> $GITHUB_ENV
 
       - name: Retrieve Jenkins Address
         id: jenkins-address
         run: |
-          JENKINS_ADDRESS=$(kubectl get svc jenkins -n jenkins -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          JENKINS_ADDRESS=$(terraform output -raw jenkins_url)          
           echo "JENKINS_ADDRESS=$JENKINS_ADDRESS" >> $GITHUB_ENV
 
       - name: Store Secrets in AWS Secrets Manager

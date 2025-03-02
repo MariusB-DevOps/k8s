@@ -68,6 +68,15 @@ jobs:
 
      - name: Install AWS ALB Ingress Controller
        run: |
+         echo "Finding the correct VPC ID for EKS..."
+         VPC_ID=$(aws eks describe-cluster \
+           --name main-eks-cluster \
+           --query "cluster.resourcesVpcConfig.vpcId" \
+           --output text \
+           --region ${{ secrets.AWS_REGION }})
+          
+         echo "Using VPC: $VPC_ID"
+
          echo "Installing AWS ALB Ingress Controller..."
          helm repo add eks https://aws.github.io/eks-charts
          helm repo update

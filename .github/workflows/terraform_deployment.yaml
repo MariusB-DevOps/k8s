@@ -75,7 +75,10 @@ jobs:
              --namespace kube-system \
              --set clusterName=main-eks-cluster \
              --set serviceAccount.create=false \
-             --set region=${{ secrets.AWS_REGION }}
+             --set serviceAccount.name=aws-load-balancer-controller \
+             --set region=${{ secrets.AWS_REGION }} \
+             --set vpcId=$(aws ec2 describe-vpcs --query 'Vpcs[0].VpcId' --output text --region ${{ secrets.AWS_REGION }}) \
+             --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/AWSLoadBalancerControllerRole"
 
      - name: Verify AWS ALB Ingress Controller Installation
        run: |

@@ -322,5 +322,31 @@ resource "aws_ssm_parameter" "jenkins_alb_hostname" {
   value = aws_lb.jenkins_alb.dns_name
 }
 
+resource "aws_iam_policy" "aws_lb_controller_policy" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  description = "IAM policy for AWS ALB Ingress Controller"
+  policy      = file("iam-policies/aws-lb-controller-policy.json")  # Load policy from a separate file
+}
+
+resource "aws_iam_role" "aws_lb_controller_role" {
+  name = "AWSLoadBalancerControllerRole"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "aws_lb_controller_attach" {
+  role       = aws_iam_role.aws_lb_controller_role.name
+  policy_arn = aws_iam_policy.aws_lb_controller_policy.arn
+}
 
 ########## Dummy change to trigger workflow

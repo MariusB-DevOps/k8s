@@ -71,7 +71,12 @@ jobs:
 
       - name: Retrieve ArgoCD Server Address
         run: |
-          ARGOCD_SERVER=$(kubectl get svc -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          ARGOCD_SERVER=""
+          while [[ -z "$ARGOCD_SERVER" ]]; do
+            echo "Waiting for ArgoCD LoadBalancer..."
+            sleep 10
+            ARGOCD_SERVER=$(kubectl get ingress -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || echo "")
+          done
           echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> $GITHUB_ENV
 
       - name: Retrieve and Decode ArgoCD Admin Password from Cluster Secret

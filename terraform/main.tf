@@ -75,6 +75,55 @@ resource "aws_eks_cluster" "main" {
   }
 }
 
+# Security Group for ArgoCD ALB
+resource "aws_security_group" "argocd_alb_sg" {
+  name        = "argocd-alb-sg"
+  description = "Allow inbound traffic for ArgoCD ALB"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Open to the internet (modify as needed)
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "argocd-alb-sg"
+  }
+}
+
+# Security Group for Jenkins ALB
+resource "aws_security_group" "jenkins_alb_sg" {
+  name        = "jenkins-alb-sg"
+  description = "Allow inbound traffic for Jenkins ALB"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Open to the internet (modify as needed)
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "jenkins-alb-sg"
+  }
+}
 
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
@@ -158,7 +207,7 @@ resource "aws_lb" "argocd_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.argocd_alb_sg.id]
-  subnets            = aws_subnet.public[*].id
+  subnets            = aws_subnet.public_subnet[*].id
 
   tags = {
     Name = "argocd-alb"
@@ -199,7 +248,7 @@ resource "aws_lb" "jenkins_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.jenkins_alb_sg.id]
-  subnets            = aws_subnet.public[*].id
+  subnets            = aws_subnet.public_subnet[*].id
 
   tags = {
     Name = "jenkins-alb"

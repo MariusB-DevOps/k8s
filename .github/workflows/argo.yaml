@@ -69,16 +69,16 @@ jobs:
         run: terraform apply -auto-approve -target=helm_release.jenkins || echo "Jenkins already installed, continuing..."
         working-directory: jenkins
 
-     - name: Retrieve ArgoCD LoadBalancer Hostname from Kubernetes
-       run: |
-         ARGOCD_SERVER=""
-         while [[ -z "$ARGOCD_SERVER" ]]; do
-           echo "Waiting for ArgoCD ALB to be assigned..."
-           sleep 10
-           ARGOCD_SERVER=$(kubectl get ingress -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || echo "")
-         done
-         echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> $GITHUB_ENV
-         echo "ArgoCD is available at https://$ARGOCD_SERVER"
+      - name: Retrieve ArgoCD LoadBalancer Hostname from Kubernetes
+        run: |
+          ARGOCD_SERVER=""
+          while [[ -z "$ARGOCD_SERVER" ]]; do
+            echo "Waiting for ArgoCD ALB to be assigned..."
+            sleep 10
+            ARGOCD_SERVER=$(kubectl get ingress -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' || echo "")
+          done
+          echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> $GITHUB_ENV
+          echo "ArgoCD is available at https://$ARGOCD_SERVER"
 
       - name: Retrieve and Decode ArgoCD Admin Password from Cluster Secret
         run: |

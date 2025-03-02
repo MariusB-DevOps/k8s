@@ -72,7 +72,7 @@ resource "helm_release" "argocd" {
 
   set {
     name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/load-balancer-name"
-    value = data.terraform_remote_state.alb.outputs.argocd_alb_hostname
+    value = data.terraform_remote_state.eks.outputs.argocd_alb_hostname
   }
 
   set {

@@ -37,7 +37,7 @@ resource "kubernetes_secret" "argocd_admin" {
     namespace = "argocd"
   }
 }
-data.terraform_remote_state.infra
+#data.terraform_remote_state.infra
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"

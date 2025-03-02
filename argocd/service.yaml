@@ -9,6 +9,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-name: "PLACEHOLDER_ARGOCD_ALB_NAME"
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip      
 spec:
   type: LoadBalancer
   ports:

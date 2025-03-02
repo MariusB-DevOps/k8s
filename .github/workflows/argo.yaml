@@ -44,10 +44,12 @@ jobs:
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name main-eks-cluster
 
-      - name: Set up AWS CLI
+      - name: Install AWS CLI
         run: |
-          sudo apt update
-          sudo apt install -y aws-cli
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          aws --version  # ✅ Verify installation
 
       - name: Retrieve ALB Names from AWS SSM
         env:

@@ -8,6 +8,15 @@ data "terraform_remote_state" "eks" {
   }
 }
 
+data "aws_eks_cluster" "main" {
+  name = "main-eks-cluster"
+}
+
+data "aws_eks_cluster_auth" "main" {
+  name = data.aws_eks_cluster.main.name
+}
+
+
 provider "kubernetes" {
   host                   = data.terraform_remote_state.eks.outputs.eks_cluster_endpoint
   token                  = data.aws_eks_cluster_auth.main.token
@@ -22,6 +31,13 @@ provider "helm" {
   }
 }
 
+resource "kubernetes_secret" "argocd_admin" {
+  metadata {
+    name      = "argocd-initial-admin-secret"
+    namespace = "argocd"
+  }
+}
+data.terraform_remote_state.infra
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"

@@ -3,7 +3,7 @@
 #}
 
 output "argocd_alb_hostname" {
-  value = data.terraform_remote_state.infra.outputs.argocd_alb_hostname
+  value = data.terraform_remote_state.eks.outputs.argocd_alb_hostname
 }
 
 output "argocd_initial_admin_secret" {

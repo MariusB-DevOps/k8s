@@ -55,7 +55,23 @@ jobs:
     
      - name: Terraform Apply
        run: terraform apply -auto-approve -input=false
-     
+  
+      - name: Install AWS ALB Ingress Controller
+        run: |
+          echo "Installing AWS ALB Ingress Controller..."
+          helm repo add eks https://aws.github.io/eks-charts
+          helm repo update
+          helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+              --namespace kube-system \
+              --set clusterName=main-eks-cluster \
+              --set serviceAccount.create=false \
+              --set region=${{ secrets.AWS_REGION }}
+
+      - name: Verify AWS ALB Ingress Controller Installation
+        run: |
+          echo "Checking if AWS ALB Ingress Controller is running..."
+          kubectl get pods -n kube-system | grep aws-load-balancer || (echo "AWS ALB Controller is missing!" && exit 1)
+
      - name: Capture Terraform Output
        id: tf_output
        run: |

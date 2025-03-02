@@ -48,6 +48,19 @@ jobs:
           #          sudo ./aws/install
           #          aws --version  # ✅ Verify installation
 
+      - name: Wait for AWS ALB Ingress Controller
+        run: |
+          echo "Waiting for AWS ALB Ingress Controller to be ready..."
+          for i in {1..10}; do
+            if kubectl get pods -n kube-system | grep aws-load-balancer | grep Running; then
+              echo "AWS ALB Ingress Controller is running!"
+              exit 0
+            fi
+            echo "Waiting for AWS ALB Ingress Controller..."
+            sleep 10
+          done
+          echo "AWS ALB Ingress Controller did not start!" && exit 1
+
       - name: Retrieve ALB Names from AWS SSM
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}

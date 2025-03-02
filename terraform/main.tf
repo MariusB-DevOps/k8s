@@ -309,13 +309,13 @@ resource "aws_route53_record" "jenkins_dns" {
   }
 }
 
-resource "aws_ssm_parameter" "argocd_alb_name" {
+resource "aws_ssm_parameter" "argocd_alb_hostname" {
   name  = "/terraform/argocd_alb_name"
   type  = "String"
   value = aws_lb.argocd_alb.name
 }
 
-resource "aws_ssm_parameter" "jenkins_alb_name" {
+resource "aws_ssm_parameter" "jenkins_alb_hostname" {
   name  = "/terraform/jenkins_alb_name"
   type  = "String"
   value = aws_lb.jenkins_alb.name
